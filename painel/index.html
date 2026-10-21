@@ -159,10 +159,8 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 
     <div class="col">
       <section class="box">
-        <header><h3>Supervisor dos agentes</h3><span class="src">aguardando conexão</span></header>
-        <ul class="rows">
-          <li class="row" tabindex="0"><span class="dot g"></span><div class="main"><strong>Ainda não conectado</strong><small>Liga quando o agente enviar as conversas por webhook ou API</small></div><span class="side">—</span></li>
-        </ul>
+        <header><h3>Supervisor dos agentes<em>hoje</em></h3><span class="src live">IA lendo as conversas</span></header>
+        <ul class="rows" id="supervisor"></ul>
       </section>
       <section class="box">
         <header><h3>Iris no WhatsApp<em>hoje</em></h3><span class="src live">Evolution</span></header>
@@ -284,10 +282,11 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
       api('whatsapp_mensagens?select=jid,nome,direcao,criado_em&order=criado_em.asc&criado_em=gte.' + encodeURIComponent(hojeISO())),
       api('whatsapp_pausa?select=jid,ate,motivo&ate=gt.' + encodeURIComponent(new Date().toISOString())),
       api('monitor_estado?select=*&order=nome.asc'),
-      api('monitor_eventos?select=*&order=criado_em.desc&limit=3&criado_em=gte.' + encodeURIComponent(hojeISO()))
+      api('monitor_eventos?select=*&order=criado_em.desc&limit=3&criado_em=gte.' + encodeURIComponent(hojeISO())),
+      api('supervisor_revisoes?select=*&order=revisado_em.desc&revisado_em=gte.' + encodeURIComponent(hojeISO()))
     ]).then(function (r) {
       var prazos = {}; (r[4] || []).forEach(function (p) { prazos[p.categoria] = p.minutos; });
-      dados = { inbox: r[0] || [], hoje: r[1] || [], leads: r[2] || [], projetos: r[3] || [], prazos: prazos, wa: r[5] || [], pausas: r[6] || [], sistemas: r[7] || [], eventos: r[8] || [] };
+      dados = { inbox: r[0] || [], hoje: r[1] || [], leads: r[2] || [], projetos: r[3] || [], prazos: prazos, wa: r[5] || [], pausas: r[6] || [], sistemas: r[7] || [], eventos: r[8] || [], revisoes: r[9] || [] };
       desenhar();
       $('sync').className = 'sync';
       $('sync').textContent = 'atualizado ' + new Date().toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
@@ -398,6 +397,25 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
       html += linha(dot, nome, sub, hora, '');
     });
     $('iris').innerHTML = html;
+
+    // Supervisor dos agentes (última revisão de cada conversa)
+    var porConversa = {}, revs = [];
+    dados.revisoes.forEach(function (rv) { if (!porConversa[rv.jid]) { porConversa[rv.jid] = 1; revs.push(rv); } });
+    var peso = { grave: 0, atencao: 1, ok: 2 };
+    var notas = revs.filter(function (rv) { return rv.nota != null; }).map(function (rv) { return rv.nota; });
+    var media = notas.length ? (notas.reduce(function (a, b) { return a + b; }, 0) / notas.length).toFixed(1) : '—';
+    var semProblema = revs.filter(function (rv) { return rv.gravidade === 'ok'; }).length;
+    html = '';
+    revs.slice().sort(function (a, b) { return peso[a.gravidade] - peso[b.gravidade]; }).filter(function (rv) { return rv.gravidade !== 'ok'; }).slice(0, 3).forEach(function (rv) {
+      var nome = esc(rv.nome || String(rv.jid).replace(/@.*/, ''));
+      var prob = (rv.problemas || []).map(esc).join(' · ') || esc(rv.resumo || '');
+      var hora = new Date(rv.ultima_msg_em).toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
+      html += linha(rv.gravidade === 'grave' ? 'c' : 'w', nome + ' · ' + (rv.gravidade === 'grave' ? 'grave' : 'atenção'), prob, hora, rv.gravidade === 'grave' ? 'c' : 'w');
+      if (rv.gravidade === 'grave') alertas.push({ n: rv.nota != null ? rv.nota : '!', c: 'c', t: 'Iris errou com ' + nome, s: prob });
+    });
+    html += linha(revs.length ? '' : 'g', revs.length ? (semProblema + (semProblema === 1 ? ' conversa sem problema' : ' conversas sem problema')) : 'Nenhuma conversa revisada hoje',
+                  revs.length ? (revs.length + ' revisadas · nota média ' + media) : 'Revisa a cada 15 min as conversas que pararam', revs.length ? 'ok' : '—', '');
+    $('supervisor').innerHTML = html;
 
     // Sistemas no ar (vigia)
     html = '';
