@@ -17,10 +17,10 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html,body{height:100%}
+html,body{height:100%;overflow:hidden}
 body{background:var(--bg);color:var(--fg);font-family:var(--display);font-size:clamp(14px,1vw,20px);line-height:1.4;
   padding-left:max(16px,4vw,env(safe-area-inset-left,0px));padding-right:max(16px,4vw,env(safe-area-inset-right,0px));padding-block:max(12px,3vh)}
-.wrap{max-width:1840px;margin:0 auto;display:grid;gap:clamp(12px,1.2vw,22px);min-height:100%;grid-template-rows:auto auto 1fr auto}
+.wrap{max-width:1840px;margin:0 auto;display:grid;gap:clamp(12px,1.2vw,22px);align-content:start}
 
 /* topo */
 .top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;justify-content:space-between}
@@ -96,7 +96,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .digest p{margin:0;color:var(--soft);max-width:110ch}
 .digest p b{color:var(--fg);font-weight:500}
 
-@media (max-width:1100px){.cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .col:last-child{grid-column:1/-1}}
+@media (max-width:900px){.cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .col:last-child{grid-column:1/-1}}
 @media (max-width:720px){.cols{grid-template-columns:minmax(0,1fr)} .col:last-child{grid-column:auto} .digest{grid-template-columns:1fr} .funnel{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .login{position:fixed;top:0;right:0;bottom:0;left:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;z-index:20}
 .login form{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:28px;width:100%;max-width:420px;display:grid;gap:14px}
@@ -166,6 +166,10 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
         <header><h3>Iris no WhatsApp<em>hoje</em></h3><span class="src live">Evolution</span></header>
         <ul class="rows" id="iris"></ul>
       </section>
+      <section class="box">
+        <header><h3>Projetos</h3><span class="src live">Notion</span></header>
+        <ul class="rows" id="projetos"></ul>
+      </section>
     </div>
 
     <div class="col">
@@ -173,10 +177,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
         <header><h3>Sistemas no ar</h3><span class="src live">vigia · a cada 5 min</span></header>
         <ul class="rows" id="sistemas"></ul>
       </section>
-      <section class="box">
-        <header><h3>Projetos</h3><span class="src live">Notion</span></header>
-        <ul class="rows" id="projetos"></ul>
-      </section>
+
     </div>
   </main>
 </div>
@@ -190,7 +191,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
   var INTERVALO = 30000;          // busca dados novos a cada 30 s
   var CHAVE = 'central_sessao';
   var FUSO = 'America/Sao_Paulo';   // a box pode estar em outro fuso
-  var VERSAO = '2026-10-21-1';      // mude a cada publicação: a TV se atualiza sozinha
+  var VERSAO = '2026-10-21-2';      // mude a cada publicação: a TV se atualiza sozinha
 
   var $ = function (id) { return document.getElementById(id); };
   var sessao = ler();
@@ -351,7 +352,9 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
     // Projetos
     html = ''; var incompletos = 0, mensal = 0, hojeDia = Number(new Date().toLocaleDateString('en-CA', { timeZone: FUSO }).slice(8, 10));
     var proximas = [];
-    dados.projetos.forEach(function (p) {
+    var nProj = 0, projOcultos = 0;
+    var ordemProj = { 'Em construção': 0, 'Testes e ajustes': 1, 'Proposta': 2, 'No ar': 3, 'Pausado': 4 };
+    dados.projetos.slice().sort(function (a, b) { return (ordemProj[a.status] == null ? 9 : ordemProj[a.status]) - (ordemProj[b.status] == null ? 9 : ordemProj[b.status]); }).forEach(function (p) {
       var falta = [];
       if (p.valor == null) falta.push('sem valor');
       if (!p.entrega) falta.push('sem entrega');
@@ -361,7 +364,8 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
       if (atrasado) alertas.push({ n: dataCurta(p.entrega), c: 'c', t: esc(p.nome) + ' passou da entrega', s: 'Notion · Projetos · ' + esc(p.status) });
       var sub = [esc(p.tipo || 'Sem tipo'), p.valor != null ? real(p.valor) : null, p.entrega ? 'entrega ' + dataCurta(p.entrega) : null]
         .concat(falta).filter(Boolean).join(' · ');
-      html += linha(n, esc(p.nome || 'Sem nome'), sub, esc(p.status || '—'), atrasado ? 'c' : '');
+      if (nProj < 4) html += linha(n, esc(p.nome || 'Sem nome'), sub, esc(p.status || '—'), atrasado ? 'c' : ''); else projOcultos++;
+      nProj++;
       if (p.mensalidade) {
         mensal += Number(p.mensalidade);
         if (p.dia_cobranca) {
@@ -370,6 +374,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
         }
       }
     });
+    if (projOcultos) html += linha('g', '+' + projOcultos + (projOcultos === 1 ? ' projeto' : ' projetos'), 'Veja todos no Notion', '', '');
     html += mensal
       ? linha('', 'Mensalidades · ' + real(mensal) + '/mês', proximas.length ? 'Próximos 10 dias: ' + proximas.join(', ') : 'Nenhuma cobrança nos próximos 10 dias', '', '')
       : linha('g', 'Mensalidades', 'Nenhuma cadastrada · preencha Mensalidade e Dia da cobrança', '—', '');
@@ -442,7 +447,18 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
     });
     if (!alertas.length) faixa += '<div class="alert ok"><span class="n">0</span><div class="x">Nada pendente agora<small>Caixa de entrada, leads e projetos em dia</small></div></div>';
     $('attention').innerHTML = faixa;
+    caber();
   }
+
+  // ---------- caber na tela da TV (sem rolagem) ----------
+  function caber() {
+    document.body.style.zoom = '';
+    var cs = getComputedStyle(document.body);
+    var conteudo = document.querySelector('.wrap').offsetHeight + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    var z = Math.min(1, (window.innerHeight / conteudo) * 0.98);
+    if (z < 1) document.body.style.zoom = Math.max(0.5, z).toFixed(3);
+  }
+  window.addEventListener('resize', caber);
 
   // ---------- relógio ----------
   function relogio() {
