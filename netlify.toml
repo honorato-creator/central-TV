@@ -1,0 +1,4 @@
+# A Netlify publica só o painel
+[build]
+  publish = "painel"
+  command = ""

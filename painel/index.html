@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Central Kaio Honorato</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: parede de controle 16:9. Faixa "precisa de você" no topo, três colunas (comercial · agentes · operação), resumo da IA no rodapé. Tema único escuro, pensado para TV. */
+:root{
+  --bg:#1c1d20; --panel:#26272b; --raise:#313236; --line:#3d3f44; --muted:#8d8f94;
+  --fg:#f5f5f5; --soft:#d8d6c9; --accent:#e65516;
+  --ok:#3fb27f; --warn:#e8b84a; --crit:#ef5350;
+  --display:"Outfit","Glacial Indifference","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--display);font-size:clamp(14px,1vw,20px);line-height:1.4;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:clamp(12px,1.4vw,28px)}
+.wrap{max-width:1840px;margin:0 auto;display:grid;gap:clamp(12px,1.2vw,22px);min-height:100%;grid-template-rows:auto auto 1fr auto}
+
+/* topo */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;justify-content:space-between}
+.brand{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.brand b{font-size:1.6em;font-weight:700;letter-spacing:-.01em}
+.brand b i{font-style:normal;color:var(--accent)}
+.brand span{color:var(--muted);text-transform:uppercase;letter-spacing:.14em;font-size:.72em}
+.clock{display:flex;align-items:center;gap:18px;font-family:var(--mono);flex-wrap:wrap}
+.clock .t{font-size:2em;font-weight:500;font-variant-numeric:tabular-nums}
+.clock .d{color:var(--soft);font-size:.85em}
+.sample{font-family:var(--mono);font-size:.68em;color:var(--warn);border:1px solid rgba(232,184,74,.45);padding:3px 8px;border-radius:4px;letter-spacing:.06em;text-transform:uppercase}
+
+/* faixa de atenção */
+.attention{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+.attention h2{margin:0;font-size:.75em;text-transform:uppercase;letter-spacing:.14em;color:var(--accent);align-self:center;padding:0 8px;font-weight:600}
+.alert{display:flex;gap:10px;align-items:center;background:var(--raise);border-radius:8px;padding:10px 14px;flex:1 1 240px;min-width:0;border-left:4px solid var(--crit)}
+.alert.w{border-left-color:var(--warn)}
+.alert .n{font-family:var(--mono);font-size:1.5em;font-weight:500;font-variant-numeric:tabular-nums}
+.alert .x{min-width:0}
+.alert .x small{display:block;color:var(--muted);font-size:.78em}
+
+/* colunas */
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1.2vw,22px);min-height:0}
+.col{display:grid;gap:clamp(12px,1.2vw,22px);align-content:start;min-width:0}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:clamp(12px,1vw,18px);min-width:0}
+.box>header{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px}
+.box h3{margin:0;font-size:1.05em;font-weight:600}
+.box h3 em{font-style:normal;color:var(--muted);font-weight:400;font-size:.8em;margin-left:6px}
+.src{font-family:var(--mono);font-size:.68em;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.src.live{color:var(--ok)}
+ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.row{display:grid;grid-template-columns:8px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 10px;border-radius:7px;background:var(--raise);outline:none;border:2px solid transparent}
+.row:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(230,85,22,.25)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.dot.w{background:var(--warn)} .dot.c{background:var(--crit);box-shadow:0 0 0 0 var(--crit);animation:pulse 1.8s infinite}
+.dot.g{background:var(--muted)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,83,80,.6)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+@media (prefers-reduced-motion:reduce){.dot.c{animation:none}}
+.row .main{min-width:0}
+.row .main strong{font-weight:500;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .main small{display:block;color:var(--muted);font-size:.8em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .side{font-family:var(--mono);font-size:.85em;text-align:right;font-variant-numeric:tabular-nums;color:var(--soft)}
+.row .side.c{color:var(--crit)} .row .side.w{color:var(--warn)}
+.score{display:inline-block;font-family:var(--mono);font-size:.75em;padding:1px 6px;border-radius:4px;background:var(--bg);color:var(--soft);margin-left:6px}
+.quote{font-style:normal;color:var(--soft)}
+.ch{display:inline-block;font-family:var(--mono);font-size:.68em;font-weight:500;padding:1px 6px;border-radius:4px;margin-right:6px;vertical-align:1px;letter-spacing:.04em}
+.ch.wa{background:rgba(63,178,127,.22);color:var(--ok)}
+.ch.em{background:rgba(216,214,201,.16);color:var(--soft)}
+.ch.st{background:rgba(230,85,22,.2);color:var(--accent)}
+.tag{display:inline-block;font-size:.7em;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-left:6px}
+.tag.hot{color:var(--accent)}
+.inbox .row{grid-template-columns:8px minmax(0,1fr) auto;align-items:start}
+.inbox .row .dot{margin-top:7px}
+.inbox .main p{margin:3px 0 0;color:var(--soft);font-size:.86em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.counts{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-family:var(--mono);font-size:.72em;color:var(--muted)}
+
+/* funil */
+.funnel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:10px}
+.stage{background:var(--raise);border-radius:7px;padding:8px 10px}
+.stage b{display:block;font-family:var(--mono);font-size:1.3em;font-weight:500;font-variant-numeric:tabular-nums}
+.stage span{font-size:.72em;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.stage.hl b{color:var(--accent)}
+
+/* barras de execuções */
+.runs{display:flex;gap:3px;align-items:flex-end;height:34px;margin-top:10px}
+.runs i{flex:1;background:var(--ok);opacity:.75;border-radius:2px 2px 0 0}
+.runs i.f{background:var(--crit);opacity:1}
+.runs-legend{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.68em;color:var(--muted);margin-top:4px}
+
+/* rodapé IA */
+.digest{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start}
+.digest .who{font-family:var(--mono);font-size:.72em;color:var(--accent);text-transform:uppercase;letter-spacing:.12em;padding-top:3px;white-space:nowrap}
+.digest p{margin:0;color:var(--soft);max-width:110ch}
+.digest p b{color:var(--fg);font-weight:500}
+
+@media (max-width:1100px){.cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .col:last-child{grid-column:1/-1}}
+@media (max-width:720px){.cols{grid-template-columns:minmax(0,1fr)} .col:last-child{grid-column:auto} .digest{grid-template-columns:1fr} .funnel{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.login{position:fixed;top:0;right:0;bottom:0;left:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;z-index:20}
+.login form{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:28px;width:100%;max-width:420px;display:grid;gap:14px}
+.login h1{margin:0;font-size:1.5em}
+.login h1 i{font-style:normal;color:var(--accent)}
+.login p{margin:0;color:var(--muted);font-size:.9em}
+.login label{display:grid;gap:6px;font-size:.85em;color:var(--soft)}
+.login input{font:inherit;padding:12px;border-radius:8px;border:2px solid var(--line);background:var(--raise);color:var(--fg)}
+.login input:focus{outline:none;border-color:var(--accent)}
+.login button{font:inherit;font-weight:600;padding:12px;border-radius:8px;border:2px solid transparent;background:var(--accent);color:#fff;cursor:pointer}
+.login button:focus{outline:none;border-color:var(--fg)}
+.login .err{color:var(--crit);font-size:.85em;min-height:1.2em}
+.sync{font-family:var(--mono);font-size:.68em;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.sync.off{color:var(--crit)}
+.alert.ok{border-left-color:var(--ok)}
+</style>
+</head>
+<body>
+<div class="login" id="login" hidden>
+  <form id="login-form" autocomplete="on">
+    <h1>kaio<i>.</i>central</h1>
+    <p>Entre uma vez. A TV continua conectada depois disso.</p>
+    <label for="email">E-mail<input id="email" type="email" required></label>
+    <label for="senha">Senha<input id="senha" type="password" required></label>
+    <button type="submit" id="entrar">Entrar</button>
+    <div class="err" id="login-err"></div>
+  </form>
+</div>
+
+<div class="wrap">
+  <div class="top">
+    <div class="brand"><b>kaio<i>.</i>central</b><span>Comercial · Agentes · Operação</span></div>
+    <div class="clock">
+      <span class="sync" id="sync">conectando…</span>
+      <span class="d" id="date">—</span>
+      <span class="t" id="time">--:--</span>
+    </div>
+  </div>
+
+  <section class="attention" id="attention" aria-label="Precisa de você agora">
+    <h2>Precisa de você</h2>
+  </section>
+
+  <main class="cols">
+    <div class="col">
+      <section class="box inbox">
+        <header><h3>Caixa de entrada<em>esperando você</em></h3><span class="src live">Gmail · WhatsApp · site</span></header>
+        <ul class="rows" id="inbox"></ul>
+        <div class="counts" id="inbox-counts"></div>
+      </section>
+
+      <section class="box">
+        <header><h3>Leads<em>status Lead no Notion</em></h3><span class="src live">Notion</span></header>
+        <ul class="rows" id="leads"></ul>
+        <div class="funnel" id="funnel"></div>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="box">
+        <header><h3>Supervisor dos agentes</h3><span class="src">aguardando conexão</span></header>
+        <ul class="rows">
+          <li class="row" tabindex="0"><span class="dot g"></span><div class="main"><strong>Ainda não conectado</strong><small>Liga quando o agente enviar as conversas por webhook ou API</small></div><span class="side">—</span></li>
+        </ul>
+      </section>
+      <section class="box">
+        <header><h3>Iris no WhatsApp<em>hoje</em></h3><span class="src live">Evolution</span></header>
+        <ul class="rows" id="iris"></ul>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="box">
+        <header><h3>Sistemas no ar</h3><span class="src live">vigia · a cada 5 min</span></header>
+        <ul class="rows" id="sistemas"></ul>
+      </section>
+      <section class="box">
+        <header><h3>Projetos</h3><span class="src live">Notion</span></header>
+        <ul class="rows" id="projetos"></ul>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  // Escrito em JavaScript antigo (ES5) para rodar no navegador interno da TV Box.
+  var SUPABASE_URL = 'https://abgpfcujibwckudkvwry.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_ssUEPt1cdnP145crrAJFQQ_z9hXbIeL';
+  var INTERVALO = 30000;          // busca dados novos a cada 30 s
+  var CHAVE = 'central_sessao';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var sessao = ler();
+  var dados = null;
+
+  // ---------- sessão ----------
+  function ler() { try { return JSON.parse(localStorage.getItem(CHAVE)) || null; } catch (e) { return null; } }
+  function salvar(s) {
+    sessao = s;
+    try { if (s) localStorage.setItem(CHAVE, JSON.stringify(s)); else localStorage.removeItem(CHAVE); } catch (e) {}
+  }
+  function guardarToken(r) {
+    salvar({ access_token: r.access_token, refresh_token: r.refresh_token,
+             expira: Date.now() + (r.expires_in || 3600) * 1000 - 60000 });
+  }
+
+  function requisicao(metodo, url, corpo, token) {
+    return new Promise(function (ok, falha) {
+      var x = new XMLHttpRequest();
+      x.open(metodo, url, true);
+      x.setRequestHeader('apikey', SUPABASE_KEY);
+      x.setRequestHeader('Content-Type', 'application/json');
+      if (token) x.setRequestHeader('Authorization', 'Bearer ' + token);
+      x.timeout = 20000;
+      x.onload = function () {
+        var json = null; try { json = JSON.parse(x.responseText); } catch (e) {}
+        if (x.status >= 200 && x.status < 300) ok(json); else falha({ status: x.status, corpo: json });
+      };
+      x.onerror = x.ontimeout = function () { falha({ status: 0 }); };
+      x.send(corpo ? JSON.stringify(corpo) : null);
+    });
+  }
+
+  function entrar(email, senha) {
+    return requisicao('POST', SUPABASE_URL + '/auth/v1/token?grant_type=password', { email: email, password: senha })
+      .then(guardarToken);
+  }
+  function renovar() {
+    if (!sessao || !sessao.refresh_token) return Promise.reject({ status: 401 });
+    return requisicao('POST', SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', { refresh_token: sessao.refresh_token })
+      .then(guardarToken);
+  }
+  function tokenValido() {
+    if (!sessao) return Promise.reject({ status: 401 });
+    if (Date.now() < sessao.expira) return Promise.resolve(sessao.access_token);
+    return renovar().then(function () { return sessao.access_token; });
+  }
+  function api(caminho) {
+    return tokenValido().then(function (t) {
+      return requisicao('GET', SUPABASE_URL + '/rest/v1/' + caminho, null, t);
+    });
+  }
+
+  // ---------- utilidades ----------
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function minutosDesde(iso) { return Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60000)); }
+  function espera(min) {
+    if (min < 60) return min + ' min';
+    if (min < 1440) return Math.floor(min / 60) + ' h ' + (min % 60) + ' min';
+    var d = Math.floor(min / 1440); return d + (d === 1 ? ' dia' : ' dias');
+  }
+  function nivel(min, prazo) { return min >= prazo ? 'c' : (min >= prazo / 2 ? 'w' : ''); }
+  function real(v) { return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
+  function dataCurta(iso) {
+    var p = String(iso).slice(0, 10).split('-'); return p[2] + '/' + p[1];
+  }
+  function hojeISO() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.toISOString(); }
+  function linha(dot, titulo, sub, lado, ladoClasse, extraHtml) {
+    return '<li class="row" tabindex="0"><span class="dot ' + (dot || '') + '"></span><div class="main"><strong>' + titulo +
+      '</strong>' + (extraHtml || ('<small>' + sub + '</small>')) + '</div><span class="side ' + (ladoClasse || '') + '">' + lado + '</span></li>';
+  }
+  var ROTULO = { cliente: 'cliente', lead: 'lead', cobranca: 'cobrança', suporte: 'suporte', aviso: 'aviso',
+                 newsletter: 'newsletter', spam: 'spam', outro: 'outro' };
+
+  // ---------- busca ----------
+  function carregar() {
+    return Promise.all([
+      api('inbox_pendente?select=*&order=recebido_em.asc&limit=8'),
+      api('inbox?select=categoria,precisa_resposta,respondido_em&recebido_em=gte.' + encodeURIComponent(hojeISO())),
+      api('leads?select=*&order=primeiro_contato.desc.nullslast'),
+      api('projetos?select=*&order=atualizado_em.desc'),
+      api('prazos?select=*'),
+      api('whatsapp_mensagens?select=jid,nome,direcao,criado_em&order=criado_em.asc&criado_em=gte.' + encodeURIComponent(hojeISO())),
+      api('whatsapp_pausa?select=jid,ate,motivo&ate=gt.' + encodeURIComponent(new Date().toISOString())),
+      api('monitor_estado?select=*&order=nome.asc'),
+      api('monitor_eventos?select=*&order=criado_em.desc&limit=3&criado_em=gte.' + encodeURIComponent(hojeISO()))
+    ]).then(function (r) {
+      var prazos = {}; (r[4] || []).forEach(function (p) { prazos[p.categoria] = p.minutos; });
+      dados = { inbox: r[0] || [], hoje: r[1] || [], leads: r[2] || [], projetos: r[3] || [], prazos: prazos, wa: r[5] || [], pausas: r[6] || [], sistemas: r[7] || [], eventos: r[8] || [] };
+      desenhar();
+      $('sync').className = 'sync';
+      $('sync').textContent = 'atualizado ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    }, function (e) {
+      if (e && (e.status === 401 || e.status === 400 || e.status === 403)) { salvar(null); mostrarLogin(); return; }
+      $('sync').className = 'sync off';
+      $('sync').textContent = 'sem conexão · tentando de novo';
+    });
+  }
+
+  // ---------- desenho ----------
+  function desenhar() {
+    if (!dados) return;
+    var alertas = [];
+
+    // Caixa de entrada
+    var html = '';
+    dados.inbox.forEach(function (m) {
+      var min = minutosDesde(m.recebido_em), prazo = m.prazo_minutos || 60, n = nivel(min, prazo);
+      var canal = m.canal === 'whatsapp' ? '<span class="ch wa">WA</span>' : (m.canal === 'site' ? '<span class="ch st">SITE</span>' : '<span class="ch em">E-MAIL</span>');
+      var quente = m.categoria === 'cliente' || m.categoria === 'lead';
+      var titulo = canal + esc(m.remetente_nome || m.remetente_contato || 'Sem nome') +
+        '<span class="tag' + (quente ? ' hot' : '') + '">' + esc(ROTULO[m.categoria] || m.categoria) + '</span>';
+      var texto = m.resumo ? esc(m.resumo) : esc(m.trecho);
+      if (m.assunto) texto = 'Assunto: ' + esc(m.assunto) + ' · ' + texto;
+      html += linha(n, titulo, '', espera(min), n, '<p>' + texto + '</p>');
+      if (n === 'c') alertas.push({ n: espera(min), c: 'c', t: esc(m.remetente_nome || m.remetente_contato) + ' esperando resposta',
+                                     s: ({ whatsapp: 'WhatsApp', site: 'Formulário do site', email: 'E-mail' }[m.canal] || 'E-mail') + ' · ' + esc(ROTULO[m.categoria]) });
+    });
+    $('inbox').innerHTML = html || linha('', 'Nada esperando você', 'Tudo que chegou hoje já foi respondido ou não precisa de resposta', 'ok', '');
+    var cont = { respondidas: 0, newsletter: 0, spam: 0, aviso: 0 };
+    dados.hoje.forEach(function (m) {
+      if (m.respondido_em) cont.respondidas++;
+      else if (cont.hasOwnProperty(m.categoria)) cont[m.categoria]++;
+    });
+    $('inbox-counts').innerHTML = '<span>hoje</span><span>' + cont.respondidas + ' respondidas</span><span>' +
+      cont.aviso + ' avisos</span><span>' + cont.newsletter + ' newsletters</span><span>' + cont.spam + ' spam</span>';
+
+    // Leads
+    html = ''; var semNome = 0, prazoLead = dados.prazos.lead || 30;
+    var abertos = dados.leads.filter(function (l) { return l.status === 'Lead'; });
+    abertos.forEach(function (l) {
+      if (!l.nome && !l.empresa) { semNome++; return; }
+      var min = l.primeiro_contato ? minutosDesde(l.primeiro_contato) : 0, n = l.primeiro_contato ? nivel(min, prazoLead) : '';
+      var sub = [l.origem, l.segmento, l.observacoes].filter(Boolean).map(esc).join(' · ') || 'Sem detalhes no Notion';
+      html += linha(n, esc(l.nome || l.empresa) + (l.nome && l.empresa ? ' · ' + esc(l.empresa) : ''), sub,
+                    l.primeiro_contato ? espera(min) : '—', n);
+    });
+    if (semNome) {
+      html += linha('g', semNome + (semNome === 1 ? ' lead sem nome' : ' leads sem nome'), 'Clientes com status Lead e campos vazios no Notion', 'revisar', '');
+      alertas.push({ n: semNome, c: 'w', t: semNome === 1 ? 'Lead sem nome no Notion' : 'Leads sem nome no Notion', s: 'Notion · Clientes' });
+    }
+    $('leads').innerHTML = html || linha('', 'Nenhum lead em aberto', 'Quando o funil gravar no Notion, ele aparece aqui', 'ok', '');
+    var conta = function (st) { return dados.leads.filter(function (l) { return st.indexOf(l.status) >= 0; }).length; };
+    $('funnel').innerHTML =
+      '<div class="stage"><b>' + conta(['Lead']) + '</b><span>Leads</span></div>' +
+      '<div class="stage"><b>' + conta(['Proposta enviada']) + '</b><span>Proposta</span></div>' +
+      '<div class="stage hl"><b>' + conta(['Ativo']) + '</b><span>Ativos</span></div>' +
+      '<div class="stage"><b>' + conta(['Concluído']) + '</b><span>Concluídos</span></div>';
+
+    // Projetos
+    html = ''; var incompletos = 0, mensal = 0, hojeDia = new Date().getDate();
+    var proximas = [];
+    dados.projetos.forEach(function (p) {
+      var falta = [];
+      if (p.valor == null) falta.push('sem valor');
+      if (!p.entrega) falta.push('sem entrega');
+      var atrasado = p.entrega && p.status !== 'No ar' && p.status !== 'Pausado' && new Date(p.entrega + 'T23:59:59') < new Date();
+      var n = atrasado ? 'c' : (falta.length && p.status !== 'No ar' ? 'w' : (p.status === 'Pausado' ? 'g' : ''));
+      if (falta.length && p.status !== 'No ar') incompletos++;
+      if (atrasado) alertas.push({ n: dataCurta(p.entrega), c: 'c', t: esc(p.nome) + ' passou da entrega', s: 'Notion · Projetos · ' + esc(p.status) });
+      var sub = [esc(p.tipo || 'Sem tipo'), p.valor != null ? real(p.valor) : null, p.entrega ? 'entrega ' + dataCurta(p.entrega) : null]
+        .concat(falta).filter(Boolean).join(' · ');
+      html += linha(n, esc(p.nome || 'Sem nome'), sub, esc(p.status || '—'), atrasado ? 'c' : '');
+      if (p.mensalidade) {
+        mensal += Number(p.mensalidade);
+        if (p.dia_cobranca) {
+          var dias = (p.dia_cobranca - hojeDia + 31) % 31;
+          if (dias <= 10) proximas.push(esc(p.nome) + ' dia ' + p.dia_cobranca);
+        }
+      }
+    });
+    html += mensal
+      ? linha('', 'Mensalidades · ' + real(mensal) + '/mês', proximas.length ? 'Próximos 10 dias: ' + proximas.join(', ') : 'Nenhuma cobrança nos próximos 10 dias', '', '')
+      : linha('g', 'Mensalidades', 'Nenhuma cadastrada · preencha Mensalidade e Dia da cobrança', '—', '');
+    if (incompletos) alertas.push({ n: incompletos, c: 'w', t: incompletos === 1 ? 'Projeto sem valor ou data de entrega' : 'Projetos sem valor ou data de entrega', s: 'Notion · Projetos' });
+    $('projetos').innerHTML = html;
+
+    // Iris no WhatsApp
+    var conv = {}, ordem = [];
+    dados.wa.forEach(function (m) {
+      if (!conv[m.jid]) { conv[m.jid] = { nome: null, ultima: null, quem: null, entradas: 0 }; ordem.push(m.jid); }
+      var c = conv[m.jid];
+      if (m.direcao === 'entrada') { c.entradas++; if (m.nome) c.nome = m.nome; }
+      c.ultima = m.criado_em; c.quem = m.direcao;
+    });
+    var pausadas = {}; dados.pausas.forEach(function (p) { pausadas[p.jid] = p; });
+    var clientes = ordem.filter(function (j) { return conv[j].entradas > 0; });
+    var irisRespondeu = dados.wa.filter(function (m) { return m.direcao === 'iris'; }).length;
+    html = linha('', clientes.length + (clientes.length === 1 ? ' conversa hoje' : ' conversas hoje'),
+                 irisRespondeu + ' respostas da Iris · ' + dados.pausas.length + ' com você no comando', '', '');
+    clientes.sort(function (a, b) { return conv[a].ultima < conv[b].ultima ? 1 : -1; }).slice(0, 4).forEach(function (j) {
+      var c = conv[j], nome = esc(c.nome || j.replace(/@.*/, ''));
+      var hora = new Date(c.ultima).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      var quem = c.quem === 'entrada' ? 'aguardando' : (c.quem === 'kaio' ? 'você respondeu' : 'Iris respondeu');
+      var sub = pausadas[j] ? 'Iris pausada · ' + esc(pausadas[j].motivo || '') : quem;
+      var dot = pausadas[j] ? 'w' : (c.quem === 'entrada' && minutosDesde(c.ultima) > 2 ? 'c' : '');
+      html += linha(dot, nome, sub, hora, '');
+    });
+    $('iris').innerHTML = html;
+
+    // Sistemas no ar (vigia)
+    html = '';
+    var ordemStatus = { fora: 0, suspeito: 1, ok: 2 };
+    dados.sistemas.slice().sort(function (a, b) { return ordemStatus[a.status] - ordemStatus[b.status]; }).forEach(function (st) {
+      var dot = st.status === 'fora' ? 'c' : (st.status === 'suspeito' ? 'w' : '');
+      var lado = st.status === 'ok' ? 'no ar' : (st.status === 'fora' ? 'fora · ' + espera(minutosDesde(st.desde)) : 'conferindo');
+      html += linha(dot, esc(st.nome), esc(st.tipo) + ' · ' + esc(st.detalhe || ''), lado, st.status === 'fora' ? 'c' : (st.status === 'suspeito' ? 'w' : ''));
+      if (st.status === 'fora') alertas.push({ n: espera(minutosDesde(st.desde)), c: 'c', t: esc(st.nome) + ' fora do ar', s: esc(st.detalhe || st.tipo) });
+    });
+    dados.eventos.forEach(function (ev) {
+      var hora = new Date(ev.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      var txt = { caiu: 'caiu', voltou: 'voltou', reparo: 'consertado sozinho', erro_fluxo: 'erro no fluxo' }[ev.evento] || ev.evento;
+      html += linha(ev.evento === 'erro_fluxo' || ev.evento === 'caiu' ? 'w' : 'g', esc(ev.nome) + ' · ' + txt, esc(ev.detalhe || ''), hora, '');
+    });
+    $('sistemas').innerHTML = html || linha('g', 'Vigia ainda não rodou', 'Aparece aqui depois da primeira checagem', '—', '');
+
+    // Faixa "Precisa de você"
+    alertas.sort(function (a, b) { return (a.c === 'c' ? 0 : 1) - (b.c === 'c' ? 0 : 1); });
+    var faixa = '<h2>Precisa de você</h2>';
+    alertas.slice(0, 4).forEach(function (a) {
+      faixa += '<div class="alert' + (a.c === 'w' ? ' w' : '') + '"><span class="n">' + a.n + '</span><div class="x">' + a.t + '<small>' + a.s + '</small></div></div>';
+    });
+    if (!alertas.length) faixa += '<div class="alert ok"><span class="n">0</span><div class="x">Nada pendente agora<small>Caixa de entrada, leads e projetos em dia</small></div></div>';
+    $('attention').innerHTML = faixa;
+  }
+
+  // ---------- relógio ----------
+  function relogio() {
+    var n = new Date();
+    $('time').textContent = n.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    $('date').textContent = n.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+  }
+
+  // ---------- login ----------
+  function mostrarLogin() { $('login').hidden = false; setTimeout(function () { $('email').focus(); }, 50); }
+  $('login-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    $('login-err').textContent = ''; $('entrar').disabled = true; $('entrar').textContent = 'Entrando…';
+    entrar($('email').value.trim(), $('senha').value).then(function () {
+      $('login').hidden = true; $('senha').value = ''; carregar();
+    }, function (err) {
+      $('login-err').textContent = err && err.status === 0 ? 'Sem internet. Confira a conexão da TV Box.' : 'E-mail ou senha incorretos.';
+    }).then(function () { $('entrar').disabled = false; $('entrar').textContent = 'Entrar'; });
+  });
+
+  // ---------- controle remoto (setas) ----------
+  var DIR = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0],
+              Up: [0, -1], Down: [0, 1], Left: [-1, 0], Right: [1, 0] };
+  document.addEventListener('keydown', function (e) {
+    if (!$('login').hidden) return;
+    var dv = DIR[e.key] || { 37: [-1, 0], 38: [0, -1], 39: [1, 0], 40: [0, 1] }[e.keyCode];
+    if (!dv) return;
+    var itens = [].slice.call(document.querySelectorAll('.row'));
+    var atual = document.activeElement;
+    if (itens.indexOf(atual) < 0) { if (itens[0]) itens[0].focus(); e.preventDefault(); return; }
+    var a = atual.getBoundingClientRect(), ax = a.left + a.width / 2, ay = a.top + a.height / 2, melhor = null, nota = 1e9;
+    itens.forEach(function (el) {
+      if (el === atual) return;
+      var r = el.getBoundingClientRect(), dx = r.left + r.width / 2 - ax, dy = r.top + r.height / 2 - ay;
+      var frente = dx * dv[0] + dy * dv[1]; if (frente <= 4) return;
+      var lado = Math.abs(dx * dv[1] + dy * dv[0]), s = frente + lado * 2;
+      if (s < nota) { nota = s; melhor = el; }
+    });
+    if (melhor) { melhor.focus(); if (melhor.scrollIntoView) melhor.scrollIntoView(false); e.preventDefault(); }
+  });
+
+  // ---------- início ----------
+  relogio(); setInterval(relogio, 1000);
+  setInterval(desenhar, 60000);   // tempos de espera sobem mesmo sem dado novo
+  if (sessao) carregar(); else mostrarLogin();
+  setInterval(function () { if (sessao) carregar(); }, INTERVALO);
+})();
+
+</script>
+</body>
+</html>

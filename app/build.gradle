@@ -1,0 +1,43 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'br.com.kaiohonorato.centraltv'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'br.com.kaiohonorato.centraltv'
+        minSdk 21
+        targetSdk 28           // a box roda Android 7 a 9; 28 evita bloqueios de abrir sozinho ao ligar
+        versionCode System.getenv('GITHUB_RUN_NUMBER') ? System.getenv('GITHUB_RUN_NUMBER').toInteger() : 1
+        versionName "1." + (System.getenv('GITHUB_RUN_NUMBER') ?: '0')
+    }
+
+    signingConfigs {
+        box {
+            // Chave fixa: cada versão nova instala por cima da anterior, sem desinstalar
+            storeFile file('central-tv.keystore')
+            storePassword 'centraltv'
+            keyAlias 'centraltv'
+            keyPassword 'centraltv'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.box
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+}

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Central TV</string>
+    <!-- Endereço do painel publicado na Netlify -->
+    <string name="painel_url" translatable="false">https://central-kaio.netlify.app</string>
+</resources>
