@@ -19,7 +19,7 @@
 [hidden]{display:none!important}
 html,body{height:100%}
 body{background:var(--bg);color:var(--fg);font-family:var(--display);font-size:clamp(14px,1vw,20px);line-height:1.4;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:clamp(12px,1.4vw,28px)}
+  padding-left:max(16px,4vw,env(safe-area-inset-left,0px));padding-right:max(16px,4vw,env(safe-area-inset-right,0px));padding-block:max(12px,3vh)}
 .wrap{max-width:1840px;margin:0 auto;display:grid;gap:clamp(12px,1.2vw,22px);min-height:100%;grid-template-rows:auto auto 1fr auto}
 
 /* topo */
@@ -191,6 +191,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
   var SUPABASE_KEY = 'sb_publishable_ssUEPt1cdnP145crrAJFQQ_z9hXbIeL';
   var INTERVALO = 30000;          // busca dados novos a cada 30 s
   var CHAVE = 'central_sessao';
+  var FUSO = 'America/Sao_Paulo';   // a box pode estar em outro fuso
 
   var $ = function (id) { return document.getElementById(id); };
   var sessao = ler();
@@ -261,7 +262,10 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
   function dataCurta(iso) {
     var p = String(iso).slice(0, 10).split('-'); return p[2] + '/' + p[1];
   }
-  function hojeISO() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.toISOString(); }
+  function hojeISO() {
+    var ymd = new Date().toLocaleDateString('en-CA', { timeZone: FUSO });   // AAAA-MM-DD em Brasília
+    return new Date(ymd + 'T00:00:00-03:00').toISOString();
+  }
   function linha(dot, titulo, sub, lado, ladoClasse, extraHtml) {
     return '<li class="row" tabindex="0"><span class="dot ' + (dot || '') + '"></span><div class="main"><strong>' + titulo +
       '</strong>' + (extraHtml || ('<small>' + sub + '</small>')) + '</div><span class="side ' + (ladoClasse || '') + '">' + lado + '</span></li>';
@@ -286,7 +290,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
       dados = { inbox: r[0] || [], hoje: r[1] || [], leads: r[2] || [], projetos: r[3] || [], prazos: prazos, wa: r[5] || [], pausas: r[6] || [], sistemas: r[7] || [], eventos: r[8] || [] };
       desenhar();
       $('sync').className = 'sync';
-      $('sync').textContent = 'atualizado ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      $('sync').textContent = 'atualizado ' + new Date().toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
     }, function (e) {
       if (e && (e.status === 401 || e.status === 400 || e.status === 403)) { salvar(null); mostrarLogin(); return; }
       $('sync').className = 'sync off';
@@ -345,7 +349,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
       '<div class="stage"><b>' + conta(['Concluído']) + '</b><span>Concluídos</span></div>';
 
     // Projetos
-    html = ''; var incompletos = 0, mensal = 0, hojeDia = new Date().getDate();
+    html = ''; var incompletos = 0, mensal = 0, hojeDia = Number(new Date().toLocaleDateString('en-CA', { timeZone: FUSO }).slice(8, 10));
     var proximas = [];
     dados.projetos.forEach(function (p) {
       var falta = [];
@@ -387,7 +391,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
                  irisRespondeu + ' respostas da Iris · ' + dados.pausas.length + ' com você no comando', '', '');
     clientes.sort(function (a, b) { return conv[a].ultima < conv[b].ultima ? 1 : -1; }).slice(0, 4).forEach(function (j) {
       var c = conv[j], nome = esc(c.nome || j.replace(/@.*/, ''));
-      var hora = new Date(c.ultima).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      var hora = new Date(c.ultima).toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
       var quem = c.quem === 'entrada' ? 'aguardando' : (c.quem === 'kaio' ? 'você respondeu' : 'Iris respondeu');
       var sub = pausadas[j] ? 'Iris pausada · ' + esc(pausadas[j].motivo || '') : quem;
       var dot = pausadas[j] ? 'w' : (c.quem === 'entrada' && minutosDesde(c.ultima) > 2 ? 'c' : '');
@@ -405,7 +409,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
       if (st.status === 'fora') alertas.push({ n: espera(minutosDesde(st.desde)), c: 'c', t: esc(st.nome) + ' fora do ar', s: esc(st.detalhe || st.tipo) });
     });
     dados.eventos.forEach(function (ev) {
-      var hora = new Date(ev.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      var hora = new Date(ev.criado_em).toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
       var txt = { caiu: 'caiu', voltou: 'voltou', reparo: 'consertado sozinho', erro_fluxo: 'erro no fluxo' }[ev.evento] || ev.evento;
       html += linha(ev.evento === 'erro_fluxo' || ev.evento === 'caiu' ? 'w' : 'g', esc(ev.nome) + ' · ' + txt, esc(ev.detalhe || ''), hora, '');
     });
@@ -424,8 +428,8 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
   // ---------- relógio ----------
   function relogio() {
     var n = new Date();
-    $('time').textContent = n.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    $('date').textContent = n.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+    $('time').textContent = n.toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
+    $('date').textContent = n.toLocaleDateString('pt-BR', { timeZone: FUSO, weekday: 'long', day: 'numeric', month: 'long' });
   }
 
   // ---------- login ----------
