@@ -107,6 +107,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .login input:focus{outline:none;border-color:var(--accent)}
 .login button{font:inherit;font-weight:600;padding:12px;border-radius:8px;border:2px solid transparent;background:var(--accent);color:#fff;cursor:pointer}
 .login button:focus{outline:none;border-color:var(--fg)}
+.login button.sec{background:var(--raise);color:var(--soft);font-weight:500}
 .login .err{color:var(--crit);font-size:.85em;min-height:1.2em}
 .sync{font-family:var(--mono);font-size:.68em;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
 .sync.off{color:var(--crit)}
@@ -118,8 +119,9 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
   <form id="login-form" autocomplete="on">
     <h1>kaio<i>.</i>central</h1>
     <p>Entre uma vez. A TV continua conectada depois disso.</p>
-    <label for="email">E-mail<input id="email" type="email" required></label>
-    <label for="senha">Senha<input id="senha" type="password" required></label>
+    <label for="email">E-mail<input id="email" type="email" required autocapitalize="none" autocorrect="off" autocomplete="username" spellcheck="false" inputmode="email"></label>
+    <label for="senha">Senha<input id="senha" type="password" required autocapitalize="none" autocorrect="off" autocomplete="current-password" spellcheck="false"></label>
+    <button type="button" id="ver-senha" class="sec">Mostrar senha</button>
     <button type="submit" id="entrar">Entrar</button>
     <div class="err" id="login-err"></div>
   </form>
@@ -427,13 +429,18 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 
   // ---------- login ----------
   function mostrarLogin() { $('login').hidden = false; setTimeout(function () { $('email').focus(); }, 50); }
+  $('ver-senha').addEventListener('click', function () {
+    var c = $('senha'), mostrar = c.type === 'password';
+    c.type = mostrar ? 'text' : 'password';
+    $('ver-senha').textContent = mostrar ? 'Esconder senha' : 'Mostrar senha';
+  });
   $('login-form').addEventListener('submit', function (e) {
     e.preventDefault();
     $('login-err').textContent = ''; $('entrar').disabled = true; $('entrar').textContent = 'Entrando…';
-    entrar($('email').value.trim(), $('senha').value).then(function () {
+    entrar($('email').value.trim().toLowerCase(), $('senha').value.replace(/\s+$/, '')).then(function () {
       $('login').hidden = true; $('senha').value = ''; carregar();
     }, function (err) {
-      $('login-err').textContent = err && err.status === 0 ? 'Sem internet. Confira a conexão da TV Box.' : 'E-mail ou senha incorretos.';
+      $('login-err').textContent = err && err.status === 0 ? 'Sem internet. Confira a conexão da TV Box.' : 'E-mail ou senha incorretos. Use "Mostrar senha" para conferir o que foi digitado.';
     }).then(function () { $('entrar').disabled = false; $('entrar').textContent = 'Entrar'; });
   });
 
