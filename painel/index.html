@@ -190,6 +190,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
   var INTERVALO = 30000;          // busca dados novos a cada 30 s
   var CHAVE = 'central_sessao';
   var FUSO = 'America/Sao_Paulo';   // a box pode estar em outro fuso
+  var VERSAO = '2026-10-21-1';      // mude a cada publicação: a TV se atualiza sozinha
 
   var $ = function (id) { return document.getElementById(id); };
   var sessao = ler();
@@ -487,6 +488,19 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
     });
     if (melhor) { melhor.focus(); if (melhor.scrollIntoView) melhor.scrollIntoView(false); e.preventDefault(); }
   });
+
+  // ---------- atualização automática do painel ----------
+  function conferirVersao() {
+    var x = new XMLHttpRequest();
+    x.open('GET', location.pathname + '?versao=' + Date.now(), true);
+    x.setRequestHeader('Cache-Control', 'no-cache');
+    x.onload = function () {
+      var m = /var VERSAO = '([^']+)'/.exec(x.responseText || '');
+      if (x.status === 200 && m && m[1] !== VERSAO) location.replace(location.pathname + '?v=' + m[1]);
+    };
+    x.send();
+  }
+  setInterval(conferirVersao, 5 * 60000);
 
   // ---------- início ----------
   relogio(); setInterval(relogio, 1000);
