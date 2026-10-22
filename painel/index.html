@@ -24,10 +24,19 @@ body{background:var(--bg);color:var(--fg);font-family:var(--display);font-size:c
 
 /* topo */
 .top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;justify-content:space-between}
-.brand{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
-.brand b{font-size:1.6em;font-weight:700;letter-spacing:-.01em}
-.brand b i{font-style:normal;color:var(--accent)}
-.brand span{color:var(--muted);text-transform:uppercase;letter-spacing:.14em;font-size:.72em}
+.brand{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0}
+.brand .bw{display:grid;gap:5px}
+.brand .bw img{width:clamp(170px,13vw,250px);height:auto;display:block}
+.brand .bw small{font-size:clamp(10px,.75vw,13px);line-height:1;letter-spacing:.5em;padding-left:2px;color:var(--soft)}
+.brand .tag-central{color:var(--muted);text-transform:uppercase;letter-spacing:.14em;font-size:.72em;padding-left:10px;border-left:1px solid var(--line);margin-left:6px}
+.kmark{--k-bg:var(--bg);width:clamp(40px,3.2vw,56px);height:clamp(40px,3.2vw,56px);flex:none;overflow:visible;color:var(--fg)}
+.kmark .k-ink{stroke:currentColor}.kmark .k-acc{stroke:var(--accent)}.kmark .k-line{stroke:currentColor;opacity:.55}.kmark .k-end{fill:currentColor;opacity:.55}
+.kmark .k-orbit{stroke:var(--accent);opacity:.7}.kmark .k-node{fill:var(--k-bg);stroke:currentColor;stroke-width:1.8}.kmark .k-hollow{stroke:var(--accent)}
+.kmark .k-dot{fill:var(--accent)}.kmark .k-hub{fill:var(--accent);transform-box:fill-box;transform-origin:center;animation:khub 3.4s ease-in-out infinite}
+.kmark .k-sat{fill:currentColor}.kmark .k-spin{transform-origin:16px 24px;animation:korb 9s linear infinite}
+@keyframes khub{50%{transform:scale(1.16)}}@keyframes korb{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.kmark .k-hub,.kmark .k-spin{animation:none}}
+.login .kmark{--k-bg:var(--panel)}
 .clock{display:flex;align-items:center;gap:18px;font-family:var(--mono);flex-wrap:wrap}
 .clock .t{font-size:2em;font-weight:500;font-variant-numeric:tabular-nums}
 .clock .d{color:var(--soft);font-size:.85em}
@@ -100,8 +109,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 @media (max-width:720px){.cols{grid-template-columns:minmax(0,1fr)} .col:last-child{grid-column:auto} .digest{grid-template-columns:1fr} .funnel{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .login{position:fixed;top:0;right:0;bottom:0;left:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;z-index:20}
 .login form{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:28px;width:100%;max-width:420px;display:grid;gap:14px}
-.login h1{margin:0;font-size:1.5em}
-.login h1 i{font-style:normal;color:var(--accent)}
+.login h1{margin:0 0 4px}
 .login p{margin:0;color:var(--muted);font-size:.9em}
 .login label{display:grid;gap:6px;font-size:.85em;color:var(--soft)}
 .login input{font:inherit;padding:12px;border-radius:8px;border:2px solid var(--line);background:var(--raise);color:var(--fg)}
@@ -118,7 +126,19 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 <body>
 <div class="login" id="login" hidden>
   <form id="login-form" autocomplete="on">
-    <h1>kaio<i>.</i>central</h1>
+    <h1 class="brand"><svg class="kmark" viewBox="0 0 48 48" aria-hidden="true">
+        <path class="k-ink" d="M16,8 Q11,16 16,24 Q11,32 16,40" fill="none" stroke-width="2.6" stroke-linecap="round"/>
+        <path class="k-acc" d="M16,24 Q26,18 36,8 M16,24 Q26,30 36,40" fill="none" stroke-width="2.6" stroke-linecap="round"/>
+        <path class="k-line" d="M16,8 H7 M36,40 H45 M36,8 H45" fill="none" stroke-width="1.3" stroke-linecap="round"/>
+        <circle class="k-end" cx="5.5" cy="8" r="1.5"/><circle class="k-end" cx="46.5" cy="40" r="1.5"/><circle class="k-end" cx="46.5" cy="8" r="1.5"/>
+        <circle class="k-orbit" cx="16" cy="24" r="10.5" fill="none" stroke-width="1" stroke-dasharray="1.5 3"/>
+        <g class="k-spin"><circle class="k-sat" cx="26.5" cy="24" r="2"/></g>
+        <circle class="k-node" cx="16" cy="8" r="3.4"/>
+        <circle class="k-node" cx="16" cy="40" r="3.4"/>
+        <circle class="k-node k-hollow" cx="36" cy="40" r="3.4"/>
+        <circle class="k-dot" cx="36" cy="8" r="3.6"/>
+        <circle class="k-hub" cx="16" cy="24" r="6"/>
+      </svg><span class="bw"><img src="wordmark-linen.png" alt="Kaio Honorato" width="1598" height="116"><small>central</small></span></h1>
     <p>Entre uma vez. A TV continua conectada depois disso.</p>
     <label for="email">E-mail<input id="email" type="email" required autocapitalize="none" autocorrect="off" autocomplete="username" spellcheck="false" inputmode="email"></label>
     <label for="senha">Senha<input id="senha" type="password" required autocapitalize="none" autocorrect="off" autocomplete="current-password" spellcheck="false"></label>
@@ -130,7 +150,19 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 
 <div class="wrap">
   <div class="top">
-    <div class="brand"><b>kaio<i>.</i>central</b><span>Comercial · Agentes · Operação</span></div>
+    <div class="brand"><svg class="kmark" viewBox="0 0 48 48" aria-hidden="true">
+        <path class="k-ink" d="M16,8 Q11,16 16,24 Q11,32 16,40" fill="none" stroke-width="2.6" stroke-linecap="round"/>
+        <path class="k-acc" d="M16,24 Q26,18 36,8 M16,24 Q26,30 36,40" fill="none" stroke-width="2.6" stroke-linecap="round"/>
+        <path class="k-line" d="M16,8 H7 M36,40 H45 M36,8 H45" fill="none" stroke-width="1.3" stroke-linecap="round"/>
+        <circle class="k-end" cx="5.5" cy="8" r="1.5"/><circle class="k-end" cx="46.5" cy="40" r="1.5"/><circle class="k-end" cx="46.5" cy="8" r="1.5"/>
+        <circle class="k-orbit" cx="16" cy="24" r="10.5" fill="none" stroke-width="1" stroke-dasharray="1.5 3"/>
+        <g class="k-spin"><circle class="k-sat" cx="26.5" cy="24" r="2"/></g>
+        <circle class="k-node" cx="16" cy="8" r="3.4"/>
+        <circle class="k-node" cx="16" cy="40" r="3.4"/>
+        <circle class="k-node k-hollow" cx="36" cy="40" r="3.4"/>
+        <circle class="k-dot" cx="36" cy="8" r="3.6"/>
+        <circle class="k-hub" cx="16" cy="24" r="6"/>
+      </svg><span class="bw"><img src="wordmark-linen.png" alt="Kaio Honorato" width="1598" height="116"><small>desenvolvedor</small></span><span class="tag-central">central · comercial · agentes · operação</span></div>
     <div class="clock">
       <span class="sync" id="sync">conectando…</span>
       <span class="d" id="date">—</span>
@@ -191,7 +223,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
   var INTERVALO = 30000;          // busca dados novos a cada 30 s
   var CHAVE = 'central_sessao';
   var FUSO = 'America/Sao_Paulo';   // a box pode estar em outro fuso
-  var VERSAO = '2026-10-21-2';      // mude a cada publicação: a TV se atualiza sozinha
+  var VERSAO = '2026-10-21-3';      // mude a cada publicação: a TV se atualiza sozinha
 
   var $ = function (id) { return document.getElementById(id); };
   var sessao = ler();
