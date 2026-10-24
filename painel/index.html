@@ -94,6 +94,11 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .stage b{display:block;font-family:var(--mono);font-size:1.3em;font-weight:500;font-variant-numeric:tabular-nums}
 .stage span{font-size:.72em;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
 .stage.hl b{color:var(--accent)}
+.prosp{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.prosp h4{margin:0 0 2px;font-size:.8em;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--soft)}
+.prosp h4 em{font-style:normal;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:400;margin-left:6px}
+.prosp .funnel{margin-top:8px}
+.prosp .counts{margin-top:8px}
 
 /* barras de execuções */
 .runs{display:flex;gap:3px;align-items:flex-end;height:34px;margin-top:10px}
@@ -188,6 +193,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
         <header><h3>Leads<em>status Lead no Notion</em></h3><span class="src live">Notion</span></header>
         <ul class="rows" id="leads"></ul>
         <div class="funnel" id="funnel"></div>
+        <div class="prosp" id="prosp" hidden></div>
       </section>
     </div>
 
@@ -225,7 +231,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
   var INTERVALO = 30000;          // busca dados novos a cada 30 s
   var CHAVE = 'central_sessao';
   var FUSO = 'America/Sao_Paulo';   // a box pode estar em outro fuso
-  var VERSAO = '2026-10-23-1';      // mude a cada publicação: a TV se atualiza sozinha
+  var VERSAO = '2026-10-24-1';      // mude a cada publicação: a TV se atualiza sozinha
 
   var $ = function (id) { return document.getElementById(id); };
   var sessao = ler();
@@ -325,10 +331,11 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
       api('whatsapp_pausa?select=jid,ate,motivo&ate=gt.' + encodeURIComponent(new Date().toISOString())),
       api('monitor_estado?select=*&order=nome.asc'),
       api('monitor_eventos?select=*&order=criado_em.desc&limit=4&or=(criado_em.gte.' + encodeURIComponent(hojeISO()) + ',and(evento.eq.erro_fluxo,resolvido_em.is.null))'),
-      api('supervisor_revisoes?select=*&order=revisado_em.desc&revisado_em=gte.' + encodeURIComponent(hojeISO()))
+      api('supervisor_revisoes?select=*&order=revisado_em.desc&revisado_em=gte.' + encodeURIComponent(hojeISO())),
+      api('prospeccao?select=status,nicho,tipo_telefone&limit=5000')
     ]).then(function (r) {
       var prazos = {}; (r[4] || []).forEach(function (p) { prazos[p.categoria] = p.minutos; });
-      dados = { inbox: r[0] || [], hoje: r[1] || [], leads: r[2] || [], projetos: r[3] || [], prazos: prazos, wa: r[5] || [], pausas: r[6] || [], sistemas: r[7] || [], eventos: r[8] || [], revisoes: r[9] || [] };
+      dados = { inbox: r[0] || [], hoje: r[1] || [], leads: r[2] || [], projetos: r[3] || [], prazos: prazos, wa: r[5] || [], pausas: r[6] || [], sistemas: r[7] || [], eventos: r[8] || [], revisoes: r[9] || [], prosp: r[10] || [] };
       desenhar();
       $('sync').className = 'sync';
       $('sync').textContent = 'atualizado ' + new Date().toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
@@ -388,6 +395,24 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
       '<div class="stage"><b>' + conta(['Proposta enviada']) + '</b><span>Proposta</span></div>' +
       '<div class="stage hl"><b>' + conta(['Ativo']) + '</b><span>Ativos</span></div>' +
       '<div class="stage"><b>' + conta(['Concluído']) + '</b><span>Concluídos</span></div>';
+
+    // Prospecção (Lista de disparo do Notion)
+    var pr = dados.prosp || [];
+    if (pr.length) {
+      var pc = function (st) { return pr.filter(function (x) { return st.indexOf(x.status) >= 0; }).length; };
+      var porNicho = {}; pr.forEach(function (x) { var k = x.nicho || 'outros'; porNicho[k] = (porNicho[k] || 0) + 1; });
+      var NOME_NICHO = { psicologa: 'psicologia', fisioterapeuta: 'fisioterapia' };
+      var cel = pr.filter(function (x) { return x.tipo_telefone === 'Celular'; }).length;
+      $('prosp').innerHTML = '<h4>Prospecção<em>' + pr.length + ' na lista de disparo</em></h4>' +
+        '<div class="funnel">' +
+        '<div class="stage"><b>' + pc(['Aguardando']) + '</b><span>Aguardando</span></div>' +
+        '<div class="stage"><b>' + pc(['Na fila']) + '</b><span>Na fila</span></div>' +
+        '<div class="stage"><b>' + pc(['Enviando', 'Enviado']) + '</b><span>Enviados</span></div>' +
+        '<div class="stage hl"><b>' + pc(['Respondeu']) + '</b><span>Responderam</span></div></div>' +
+        '<div class="counts">' + Object.keys(porNicho).sort().map(function (k) { return '<span>' + esc(NOME_NICHO[k] || k) + ' ' + porNicho[k] + '</span>'; }).join('') +
+        '<span>' + cel + ' com celular</span></div>';
+      $('prosp').hidden = false;
+    } else { $('prosp').hidden = true; }
 
     // Projetos
     html = ''; var incompletos = 0, mensal = 0, hojeDia = Number(new Date().toLocaleDateString('en-CA', { timeZone: FUSO }).slice(8, 10));
