@@ -73,6 +73,8 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .row .main small{display:block;color:var(--muted);font-size:.8em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .row .side{font-family:var(--mono);font-size:.85em;text-align:right;font-variant-numeric:tabular-nums;color:var(--soft)}
 .row .side.c{color:var(--crit)} .row .side.w{color:var(--warn)}
+.row.armed{border-color:var(--warn);box-shadow:0 0 0 4px rgba(232,170,60,.25)}
+.row.armed .side{color:var(--warn)}
 .score{display:inline-block;font-family:var(--mono);font-size:.75em;padding:1px 6px;border-radius:4px;background:var(--bg);color:var(--soft);margin-left:6px}
 .quote{font-style:normal;color:var(--soft)}
 .ch{display:inline-block;font-family:var(--mono);font-size:.68em;font-weight:500;padding:1px 6px;border-radius:4px;margin-right:6px;vertical-align:1px;letter-spacing:.04em}
@@ -177,7 +179,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
   <main class="cols">
     <div class="col">
       <section class="box inbox">
-        <header><h3>Caixa de entrada<em>esperando você</em></h3><span class="src live">Gmail · WhatsApp · site</span></header>
+        <header><h3>Caixa de entrada<em>esperando você · OK 2× = respondi</em></h3><span class="src live">Gmail · WhatsApp · site</span></header>
         <ul class="rows" id="inbox"></ul>
         <div class="counts" id="inbox-counts"></div>
       </section>
@@ -223,7 +225,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
   var INTERVALO = 30000;          // busca dados novos a cada 30 s
   var CHAVE = 'central_sessao';
   var FUSO = 'America/Sao_Paulo';   // a box pode estar em outro fuso
-  var VERSAO = '2026-10-21-3';      // mude a cada publicação: a TV se atualiza sozinha
+  var VERSAO = '2026-10-23-1';      // mude a cada publicação: a TV se atualiza sozinha
 
   var $ = function (id) { return document.getElementById(id); };
   var sessao = ler();
@@ -277,6 +279,12 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
     });
   }
 
+  function rpc(nome, corpo) {
+    return tokenValido().then(function (t) {
+      return requisicao('POST', SUPABASE_URL + '/rest/v1/rpc/' + nome, corpo, t);
+    });
+  }
+
   // ---------- utilidades ----------
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -316,7 +324,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
       api('whatsapp_mensagens?select=jid,nome,direcao,criado_em&order=criado_em.asc&criado_em=gte.' + encodeURIComponent(hojeISO())),
       api('whatsapp_pausa?select=jid,ate,motivo&ate=gt.' + encodeURIComponent(new Date().toISOString())),
       api('monitor_estado?select=*&order=nome.asc'),
-      api('monitor_eventos?select=*&order=criado_em.desc&limit=3&criado_em=gte.' + encodeURIComponent(hojeISO())),
+      api('monitor_eventos?select=*&order=criado_em.desc&limit=4&or=(criado_em.gte.' + encodeURIComponent(hojeISO()) + ',and(evento.eq.erro_fluxo,resolvido_em.is.null))'),
       api('supervisor_revisoes?select=*&order=revisado_em.desc&revisado_em=gte.' + encodeURIComponent(hojeISO()))
     ]).then(function (r) {
       var prazos = {}; (r[4] || []).forEach(function (p) { prazos[p.categoria] = p.minutos; });
@@ -346,7 +354,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
         '<span class="tag' + (quente ? ' hot' : '') + '">' + esc(ROTULO[m.categoria] || m.categoria) + '</span>';
       var texto = m.resumo ? esc(m.resumo) : esc(m.trecho);
       if (m.assunto) texto = 'Assunto: ' + esc(m.assunto) + ' · ' + texto;
-      html += linha(n, titulo, '', espera(min), n, '<p>' + texto + '</p>');
+      html += linha(n, titulo, '', espera(min), n, '<p>' + texto + '</p>').replace('<li class="row"', '<li class="row inb" data-id="' + esc(m.id) + '"');
       if (n === 'c') alertas.push({ n: espera(min), c: 'c', t: esc(m.remetente_nome || m.remetente_contato) + ' esperando resposta',
                                      s: ({ whatsapp: 'WhatsApp', site: 'Formulário do site', email: 'E-mail' }[m.canal] || 'E-mail') + ' · ' + esc(ROTULO[m.categoria]) });
     });
@@ -467,7 +475,18 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
     dados.eventos.forEach(function (ev) {
       var hora = new Date(ev.criado_em).toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
       var txt = { caiu: 'caiu', voltou: 'voltou', reparo: 'consertado sozinho', erro_fluxo: 'erro no fluxo' }[ev.evento] || ev.evento;
-      html += linha(ev.evento === 'erro_fluxo' || ev.evento === 'caiu' ? 'w' : 'g', esc(ev.nome) + ' · ' + txt, esc(ev.detalhe || ''), hora, '');
+      if (ev.evento === 'erro_fluxo') {
+        if (ev.resolvido_em) {
+          var horaOk = new Date(ev.resolvido_em).toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
+          html += linha('', esc(ev.nome), 'Erro às ' + hora + ' · resolvido às ' + horaOk, 'resolvido', '');
+        } else {
+          var minErro = minutosDesde(ev.criado_em);
+          html += linha('w', esc(ev.nome) + ' · erro no fluxo', esc(ev.detalhe || ''), hora, 'w');
+          if (minErro >= 15) alertas.push({ n: espera(minErro), c: 'w', t: esc(ev.nome) + ' com erro', s: 'Ainda não voltou a rodar bem' });
+        }
+        return;
+      }
+      html += linha(ev.evento === 'caiu' ? 'w' : 'g', esc(ev.nome) + ' · ' + txt, esc(ev.detalhe || ''), hora, '');
     });
     $('sistemas').innerHTML = html || linha('g', 'Vigia ainda não rodou', 'Aparece aqui depois da primeira checagem', '—', '');
 
@@ -519,8 +538,35 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
   // ---------- controle remoto (setas) ----------
   var DIR = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0],
               Up: [0, -1], Down: [0, 1], Left: [-1, 0], Right: [1, 0] };
+  var armado = null;
+  function respondi(el) {
+    if (!el || !el.getAttribute('data-id')) return;
+    var id = el.getAttribute('data-id'), lado = el.querySelector('.side');
+    if (!armado || armado.id !== id || Date.now() > armado.ate) {
+      [].forEach.call(document.querySelectorAll('.row.armed'), function (r) { r.classList.remove('armed'); });
+      armado = { id: id, ate: Date.now() + 6000, txt: lado ? lado.textContent : '' };
+      el.classList.add('armed'); if (lado) lado.textContent = 'OK de novo = respondi';
+      setTimeout(function () { if (armado && armado.id === id && Date.now() > armado.ate) { el.classList.remove('armed'); if (lado) lado.textContent = armado.txt; armado = null; } }, 6200);
+      return;
+    }
+    armado = null; if (lado) lado.textContent = 'marcando…';
+    rpc('marcar_respondido', { p_id: id }).then(function () {
+      dados.inbox = dados.inbox.filter(function (m) { return m.id !== id; });
+      desenhar(); carregar();
+      var primeiro = document.querySelector('.row'); if (primeiro) primeiro.focus();
+    }, function () { el.classList.remove('armed'); if (lado) lado.textContent = 'não deu, tente de novo'; });
+  }
+  document.addEventListener('click', function (e) {
+    var el = e.target && e.target.closest ? e.target.closest('.row.inb') : null;
+    if (el) { el.focus(); respondi(el); }
+  });
   document.addEventListener('keydown', function (e) {
     if (!$('login').hidden) return;
+    if (e.key === 'Enter' || e.keyCode === 13 || e.keyCode === 23) {
+      var foco = document.activeElement;
+      if (foco && foco.classList && foco.classList.contains('inb')) { respondi(foco); e.preventDefault(); }
+      return;
+    }
     var dv = DIR[e.key] || { 37: [-1, 0], 38: [0, -1], 39: [1, 0], 40: [0, 1] }[e.keyCode];
     if (!dv) return;
     var itens = [].slice.call(document.querySelectorAll('.row'));
