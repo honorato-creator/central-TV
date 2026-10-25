@@ -4,151 +4,197 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Central Kaio Honorato</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600&family=Rajdhani:wght@500;600;700&display=swap">
 <style>
-/* Layout: parede de controle 16:9. Faixa "precisa de você" no topo, três colunas (comercial · agentes · operação), resumo da IA no rodapé. Tema único escuro, pensado para TV. */
+/* Central em tema HUD: tela desenhada em 1920x1080 e escalada para a TV. Paleta da marca: laranja #E65516, grafite, linho. */
 :root{
-  --bg:#1c1d20; --panel:#26272b; --raise:#313236; --line:#3d3f44; --muted:#8d8f94;
-  --fg:#f5f5f5; --soft:#d8d6c9; --accent:#e65516;
-  --ok:#3fb27f; --warn:#e8b84a; --crit:#ef5350;
-  --display:"Outfit","Glacial Indifference","Segoe UI",system-ui,sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",monospace;
-  color-scheme:dark;
+  --mg:#E65516; --cy:#D8D6C9; --vi:#b8441a; --ok:#3fd08f; --warn:#f2c14e; --crit:#ff4d4d;
+  --txt:#F5F5F5; --dim:#a5a3a0; --lbl:#ff8a4d;
+  --num:"Exo 2",sans-serif; --ui:"Rajdhani",sans-serif;
 }
-*{box-sizing:border-box}
-[hidden]{display:none!important}
-html,body{height:100%;overflow:hidden}
-body{background:var(--bg);color:var(--fg);font-family:var(--display);font-size:clamp(14px,1vw,20px);line-height:1.4;
-  padding-left:max(16px,4vw,env(safe-area-inset-left,0px));padding-right:max(16px,4vw,env(safe-area-inset-right,0px));padding-block:max(12px,3vh)}
-.wrap{max-width:1840px;margin:0 auto;display:grid;gap:clamp(12px,1.2vw,22px);align-content:start}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#0c0c0e}
+body{font-family:var(--ui);color:var(--txt);font-weight:500}
+/* tela fixa 1920x1080, escalada para caber em qualquer TV */
+#tela{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;
+  background:radial-gradient(ellipse 50% 40% at 50% 45%,rgba(230,85,22,.22),transparent 70%),
+             radial-gradient(ellipse 70% 40% at 50% 100%,rgba(230,85,22,.18),transparent 70%),
+             linear-gradient(180deg,#0e0e10,#151517 60%,#1e1814)}
+.grade{position:absolute;top:0;right:0;bottom:0;left:0;background-image:linear-gradient(rgba(216,214,201,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(216,214,201,.035) 1px,transparent 1px);background-size:48px 48px}
+.moldura{position:absolute;top:10px;right:10px;bottom:10px;left:10px;border:1px solid rgba(216,214,201,.25);
+  clip-path:polygon(40px 0,calc(100% - 40px) 0,100% 40px,100% calc(100% - 40px),calc(100% - 40px) 100%,40px 100%,0 calc(100% - 40px),0 40px)}
+
+/* ---------- painéis neon ---------- */
+.g{position:absolute;filter:drop-shadow(0 0 7px rgba(230,85,22,.55)) drop-shadow(0 0 2px rgba(216,214,201,.5))}
+.g.c{filter:drop-shadow(0 0 7px rgba(216,214,201,.55)) drop-shadow(0 0 2px rgba(230,85,22,.4))}
+.pn{width:100%;height:100%;padding:1.6px;background:linear-gradient(140deg,var(--mg),var(--vi) 45%,var(--cy));
+  clip-path:polygon(22px 0,100% 0,100% calc(100% - 22px),calc(100% - 22px) 100%,0 100%,0 22px)}
+.g.c .pn{background:linear-gradient(140deg,var(--cy),var(--vi) 50%,var(--mg))}
+.in{width:100%;height:100%;padding:16px 20px;position:relative;
+  background:linear-gradient(180deg,rgba(42,43,47,.94),rgba(22,22,24,.96));
+  clip-path:polygon(21px 0,100% 0,100% calc(100% - 21px),calc(100% - 21px) 100%,0 100%,0 21px)}
+.in:after{content:'';position:absolute;right:10px;top:10px;width:26px;height:2px;background:var(--cy);box-shadow:0 0 6px var(--cy)}
+.tt{display:flex;align-items:center;gap:10px;font-size:21px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#fff;text-shadow:0 0 8px rgba(230,85,22,.8)}
+.tt svg{width:22px;height:22px;stroke:var(--mg);fill:none;stroke-width:1.8;filter:drop-shadow(0 0 4px var(--mg))}
+.tt small{margin-left:auto;font-size:13px;letter-spacing:.18em;color:var(--cy);text-shadow:0 0 6px rgba(216,214,201,.9)}
+.lbl{font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--lbl)}
+.big{font-family:var(--num);font-weight:300;color:#fff;text-shadow:0 0 12px rgba(255,255,255,.35)}
+
+/* linhas de lista */
+.it{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(216,214,201,.18)}
+.it:last-child{border-bottom:0}
+.compacto .it{padding:6px 0}.compacto .it b{font-size:17px}.compacto .it span{font-size:14px}.compacto .ic{width:28px;height:28px}
+.rod{position:absolute;left:20px;right:20px;bottom:14px;display:flex;gap:18px;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);border-top:1px solid rgba(216,214,201,.25);padding-top:10px}
+.rod b{font-family:var(--num);font-weight:400;color:#fff;margin-right:6px;font-size:17px}
+.ic{width:34px;height:34px;display:grid;place-items:center;border:1px solid rgba(216,214,201,.6);clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);background:rgba(216,214,201,.08)}
+.ic svg{width:18px;height:18px;stroke:var(--cy);fill:none;stroke-width:1.8}
+.ic.m{border-color:rgba(230,85,22,.7);background:rgba(230,85,22,.1)} .ic.m svg{stroke:var(--mg)}
+.ic.w{border-color:rgba(242,193,78,.7);background:rgba(242,193,78,.1)} .ic.w svg{stroke:var(--warn)}
+.ic.r{border-color:rgba(255,77,77,.8);background:rgba(255,77,77,.12)} .ic.r svg{stroke:var(--crit)}
+.it b{display:block;font-size:19px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it span{display:block;font-size:16px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it i{font-style:normal;font-family:var(--num);font-size:15px;color:var(--lbl);text-align:right}
+.it i.cy{color:var(--cy)} .it i.r{color:var(--crit);text-shadow:0 0 8px rgba(255,77,77,.8)} .it i.w{color:var(--warn)}
+
+/* medidor circular */
+.gauge{position:relative;display:grid;place-items:center}
+.gauge svg{position:absolute;top:0;right:0;bottom:0;left:0;transform:rotate(-90deg)}
+.gauge .v{position:relative;text-align:center;line-height:1}
+.gauge .v small{display:block;font-size:13px;letter-spacing:.14em;color:var(--lbl);margin-bottom:6px;text-transform:uppercase}
+.kv{display:grid;grid-template-columns:1fr auto;gap:8px 18px;align-items:baseline}
+.kv dt{font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--lbl);display:flex;align-items:center;gap:8px}
+.kv dt:before{content:'';width:6px;height:6px;border-radius:50%;background:var(--cy);box-shadow:0 0 6px var(--cy)}
+.kv dd{font-family:var(--num);font-size:22px;font-weight:400;text-align:right}
+.barra{height:14px;background:rgba(216,214,201,.18);border:1px solid rgba(216,214,201,.4);border-radius:8px;overflow:hidden}
+.barra i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,var(--mg),var(--vi));box-shadow:0 0 10px var(--mg)}
+.eq{display:flex;align-items:flex-end;gap:5px;height:56px}
+.eq i{flex:1;background:linear-gradient(0deg,var(--vi),var(--mg));box-shadow:0 0 6px rgba(230,85,22,.6);border-radius:1px;animation:eq 2.4s ease-in-out infinite;transform-origin:bottom}
+@keyframes eq{50%{transform:scaleY(.55)}}
+
+/* centro */
+.hero .in{padding:0;background:transparent}
+.hero .pn{background:linear-gradient(180deg,var(--mg),var(--vi) 60%,rgba(216,214,201,.6))}
+.anel{position:absolute;left:50%;top:22px;width:390px;height:390px;margin-left:-195px}
+.anel .gira1{transform-origin:200px 200px;animation:gira 30s linear infinite}
+.anel .gira2{transform-origin:200px 200px;animation:gira 18s linear infinite reverse}
+.anel .gira3{transform-origin:200px 200px;animation:gira 60s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+.hora{position:absolute;left:0;right:0;top:112px;text-align:center;line-height:1}
+.hora .dia{font-size:24px;letter-spacing:.24em;color:#D8D6C9;text-transform:uppercase}
+.hora .t{font-family:var(--num);font-weight:300;font-size:100px;letter-spacing:.02em;color:#fff;text-shadow:0 0 18px rgba(255,255,255,.55),0 0 40px rgba(216,214,201,.8);margin:10px 0 6px}
+.hora .dt{font-size:22px;letter-spacing:.2em;color:var(--txt)}
+.hora .dt b{color:var(--mg);font-weight:600}
+.onda path{fill:none;stroke-linejoin:round}
+.dias{display:flex;justify-content:space-between;font-size:14px;letter-spacing:.14em;color:var(--dim);padding:0 6px}
+.dias span.on{color:#fff;border:1px solid var(--mg);padding:0 7px;box-shadow:0 0 8px rgba(230,85,22,.6)}
+.tiles{position:absolute;display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.tile .in{display:grid;justify-items:center;align-content:center;gap:6px;text-align:center;padding:14px 10px}
+.tile svg{width:40px;height:40px;fill:none;stroke-width:1.6}
+.tile .big{font-size:40px;line-height:1}
+.tile .lbl{font-size:14px}
+
+.rxp{position:absolute;left:50%;top:50%;width:390px;height:390px;margin:-195px 0 0 -195px}
+.rxp #nodes{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;overflow:visible}
+.rxp #neu{position:absolute;left:28.4%;top:28.4%;width:43.2%;height:43.2%;border-radius:50%}
+.cantos{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;filter:drop-shadow(0 0 5px #E65516)}
+.hcanto{position:absolute;top:50%;transform:translateY(-50%);line-height:1}
+.hcanto.e{left:38px}
+.hcanto.e .dia{font-size:17px;letter-spacing:.24em;color:var(--cy)}
+.hcanto.e .t{font-family:var(--num);font-weight:300;font-size:58px;color:#fff;text-shadow:0 0 16px rgba(255,255,255,.45),0 0 34px rgba(230,85,22,.7);margin:10px 0 8px}
+.hcanto.e .dt{font-size:16px;letter-spacing:.2em}
+.hcanto.e .dt b{color:var(--mg);font-weight:600}
+.hcanto.d{right:38px;display:grid;gap:14px;min-width:132px}
+.hcanto.d .ln{display:grid;gap:4px;border-left:2px solid var(--mg);padding-left:10px}
+.hcanto.d span{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--lbl)}
+.hcanto.d b{font-family:var(--num);font-weight:400;font-size:20px;color:#fff}
+.hcanto.d b.on{color:var(--ok);text-shadow:0 0 8px var(--ok)}
+/* barra inferior */
+.base{position:absolute;left:28px;right:28px;bottom:22px;height:46px;display:flex;align-items:center;gap:18px;padding:0 26px;
+  border:1px solid rgba(230,85,22,.55);box-shadow:0 0 12px rgba(230,85,22,.35),inset 0 0 18px rgba(216,214,201,.25);background:rgba(24,24,26,.88);
+  clip-path:polygon(18px 0,calc(100% - 18px) 0,100% 50%,calc(100% - 18px) 100%,18px 100%,0 50%);font-size:15px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.base b{color:#fff;font-weight:600}
+.base .st{display:flex;align-items:center;gap:8px}
+.base .st:before{content:'';width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.base .sp{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--mg),transparent)}
 
 /* topo */
-.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;justify-content:space-between}
-.brand{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0}
-.brand .bw{display:grid;gap:5px}
-.brand .bw img{width:clamp(170px,13vw,250px);height:auto;display:block}
-.brand .bw small{font-size:clamp(10px,.75vw,13px);line-height:1;letter-spacing:.5em;padding-left:2px;color:var(--soft)}
-.brand .tag-central{color:var(--muted);text-transform:uppercase;letter-spacing:.14em;font-size:.72em;padding-left:10px;border-left:1px solid var(--line);margin-left:6px}
-.kmark{--k-bg:var(--bg);width:clamp(40px,3.2vw,56px);height:clamp(40px,3.2vw,56px);flex:none;overflow:visible;color:var(--fg)}
-.kmark .k-ink{stroke:currentColor}.kmark .k-acc{stroke:var(--accent)}.kmark .k-line{stroke:currentColor;opacity:.55}.kmark .k-end{fill:currentColor;opacity:.55}
-.kmark .k-orbit{stroke:var(--accent);opacity:.7}.kmark .k-node{fill:var(--k-bg);stroke:currentColor;stroke-width:1.8}.kmark .k-hollow{stroke:var(--accent)}
-.kmark .k-dot{fill:var(--accent)}.kmark .k-hub{fill:var(--accent);transform-box:fill-box;transform-origin:center;animation:khub 3.4s ease-in-out infinite}
-.kmark .k-sat{fill:currentColor}.kmark .k-spin{transform-origin:16px 24px;animation:korb 9s linear infinite}
-@keyframes khub{50%{transform:scale(1.16)}}@keyframes korb{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){.kmark .k-hub,.kmark .k-spin{animation:none}}
-.login .kmark{--k-bg:var(--panel)}
-.clock{display:flex;align-items:center;gap:18px;font-family:var(--mono);flex-wrap:wrap}
-.clock .t{font-size:2em;font-weight:500;font-variant-numeric:tabular-nums}
-.clock .d{color:var(--soft);font-size:.85em}
-.sample{font-family:var(--mono);font-size:.68em;color:var(--warn);border:1px solid rgba(232,184,74,.45);padding:3px 8px;border-radius:4px;letter-spacing:.06em;text-transform:uppercase}
+.topo{position:absolute;left:28px;right:28px;top:22px;height:58px;display:flex;align-items:center;justify-content:space-between}
+.topo .esq{display:flex;align-items:center;gap:12px;font-size:17px;letter-spacing:.2em;color:var(--cy);text-shadow:0 0 8px rgba(216,214,201,.8)}
+.topo .esq:after{content:'';width:120px;height:1px;background:linear-gradient(90deg,var(--mg),transparent)}
+.aba{position:absolute;left:50%;top:0;transform:translateX(-50%);height:56px;padding:0 54px;display:flex;align-items:center;gap:14px;
+  border:1.6px solid var(--mg);box-shadow:0 0 12px rgba(230,85,22,.6),inset 0 0 14px rgba(230,85,22,.25);background:rgba(30,30,33,.92);
+  clip-path:polygon(22px 0,calc(100% - 22px) 0,100% 50%,calc(100% - 22px) 100%,22px 100%,0 50%)}
+.aba img{height:22px;display:block}
+.aba span{font-size:14px;letter-spacing:.4em;color:var(--lbl)}
+.topo .dir{display:flex;align-items:center;gap:20px;font-size:14px;letter-spacing:.16em;color:var(--dim)}
+.topo .dir svg{width:22px;height:22px;stroke:var(--cy);fill:none;stroke-width:1.8;filter:drop-shadow(0 0 4px var(--cy))}
 
-/* faixa de atenção */
-.attention{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
-.attention h2{margin:0;font-size:.75em;text-transform:uppercase;letter-spacing:.14em;color:var(--accent);align-self:center;padding:0 8px;font-weight:600}
-.alert{display:flex;gap:10px;align-items:center;background:var(--raise);border-radius:8px;padding:10px 14px;flex:1 1 240px;min-width:0;border-left:4px solid var(--crit)}
-.alert.w{border-left-color:var(--warn)}
-.alert .n{font-family:var(--mono);font-size:1.5em;font-weight:500;font-variant-numeric:tabular-nums}
-.alert .x{min-width:0}
-.alert .x small{display:block;color:var(--muted);font-size:.78em}
-
-/* colunas */
-.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1.2vw,22px);min-height:0}
-.col{display:grid;gap:clamp(12px,1.2vw,22px);align-content:start;min-width:0}
-.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:clamp(12px,1vw,18px);min-width:0}
-.box>header{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px}
-.box h3{margin:0;font-size:1.05em;font-weight:600}
-.box h3 em{font-style:normal;color:var(--muted);font-weight:400;font-size:.8em;margin-left:6px}
-.src{font-family:var(--mono);font-size:.68em;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.src.live{color:var(--ok)}
-ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
-.row{display:grid;grid-template-columns:8px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 10px;border-radius:7px;background:var(--raise);outline:none;border:2px solid transparent}
-.row:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(230,85,22,.25)}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
-.dot.w{background:var(--warn)} .dot.c{background:var(--crit);box-shadow:0 0 0 0 var(--crit);animation:pulse 1.8s infinite}
-.dot.g{background:var(--muted)}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,83,80,.6)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
-@media (prefers-reduced-motion:reduce){.dot.c{animation:none}}
-.row .main{min-width:0}
-.row .main strong{font-weight:500;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.row .main small{display:block;color:var(--muted);font-size:.8em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.row .side{font-family:var(--mono);font-size:.85em;text-align:right;font-variant-numeric:tabular-nums;color:var(--soft)}
-.row .side.c{color:var(--crit)} .row .side.w{color:var(--warn)}
-.row.armed{border-color:var(--warn);box-shadow:0 0 0 4px rgba(232,170,60,.25)}
+/* partículas e varredura */
+.p{position:absolute;bottom:-6px;width:3px;height:3px;border-radius:50%;background:var(--cy);box-shadow:0 0 6px var(--cy);animation:sobe linear infinite}
+.p.m{background:var(--mg);box-shadow:0 0 6px var(--mg)}
+@keyframes sobe{to{transform:translateY(-1100px)}}
+.scan{position:absolute;left:0;right:0;top:0;height:180px;background:linear-gradient(180deg,transparent,rgba(216,214,201,.05),transparent);animation:scan 10s linear infinite;pointer-events:none}
+@keyframes scan{from{transform:translateY(-200px)}to{transform:translateY(1100px)}}
+.win{animation:pisca 3.5s steps(1) infinite}
+@keyframes pisca{50%{opacity:.1}}
+.pulsa{animation:pulsa 1.6s ease-in-out infinite}
+@keyframes pulsa{50%{opacity:.35}}
+/* ---------- painel real ---------- */
+.lista{list-style:none;margin:8px 0 0;padding:0}
+.it{outline:none;border:1px solid transparent;margin:0 -8px;padding-left:8px;padding-right:8px}
+.it .tx{min-width:0}
+.it b .tag{font-style:normal;font-size:13px;letter-spacing:.14em;margin-left:8px;color:var(--dim);vertical-align:2px}
+.it b .tag.hot{color:var(--lbl)}
+.row:focus{border-color:var(--mg);background:rgba(230,85,22,.12);box-shadow:0 0 12px rgba(230,85,22,.45)}
+.row.armed{border-color:var(--warn);background:rgba(242,193,78,.14)}
 .row.armed .side{color:var(--warn)}
-.score{display:inline-block;font-family:var(--mono);font-size:.75em;padding:1px 6px;border-radius:4px;background:var(--bg);color:var(--soft);margin-left:6px}
-.quote{font-style:normal;color:var(--soft)}
-.ch{display:inline-block;font-family:var(--mono);font-size:.68em;font-weight:500;padding:1px 6px;border-radius:4px;margin-right:6px;vertical-align:1px;letter-spacing:.04em}
-.ch.wa{background:rgba(63,178,127,.22);color:var(--ok)}
-.ch.em{background:rgba(216,214,201,.16);color:var(--soft)}
-.ch.st{background:rgba(230,85,22,.2);color:var(--accent)}
-.tag{display:inline-block;font-size:.7em;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-left:6px}
-.tag.hot{color:var(--accent)}
-.inbox .row{grid-template-columns:8px minmax(0,1fr) auto;align-items:start}
-.inbox .row .dot{margin-top:7px}
-.inbox .main p{margin:3px 0 0;color:var(--soft);font-size:.86em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.counts{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-family:var(--mono);font-size:.72em;color:var(--muted)}
-
-/* funil */
-.funnel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:10px}
-.stage{background:var(--raise);border-radius:7px;padding:8px 10px}
-.stage b{display:block;font-family:var(--mono);font-size:1.3em;font-weight:500;font-variant-numeric:tabular-nums}
-.stage span{font-size:.72em;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.stage.hl b{color:var(--accent)}
-.stage.w b{color:var(--warn)} .stage.c b{color:var(--crit)}
-.cobr .funnel{grid-template-columns:repeat(3,minmax(0,1fr));margin:0 0 8px}
-.stage.ok b{color:var(--ok)}
-.prosp{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
-.prosp h4{margin:0 0 2px;font-size:.8em;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--soft)}
-.prosp h4 em{font-style:normal;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:400;margin-left:6px}
-.prosp .funnel{margin-top:8px}
-.prosp .counts{margin-top:8px}
-
-/* barras de execuções */
-.runs{display:flex;gap:3px;align-items:flex-end;height:34px;margin-top:10px}
-.runs i{flex:1;background:var(--ok);opacity:.75;border-radius:2px 2px 0 0}
-.runs i.f{background:var(--crit);opacity:1}
-.runs-legend{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.68em;color:var(--muted);margin-top:4px}
-
-/* rodapé IA */
-.digest{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start}
-.digest .who{font-family:var(--mono);font-size:.72em;color:var(--accent);text-transform:uppercase;letter-spacing:.12em;padding-top:3px;white-space:nowrap}
-.digest p{margin:0;color:var(--soft);max-width:110ch}
-.digest p b{color:var(--fg);font-weight:500}
-
-@media (max-width:900px){.cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .col:last-child{grid-column:1/-1}}
-@media (max-width:720px){.cols{grid-template-columns:minmax(0,1fr)} .col:last-child{grid-column:auto} .digest{grid-template-columns:1fr} .funnel{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.login{position:fixed;top:0;right:0;bottom:0;left:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;z-index:20}
-.login form{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:28px;width:100%;max-width:420px;display:grid;gap:14px}
-.login h1{margin:0 0 4px}
-.login p{margin:0;color:var(--muted);font-size:.9em}
-.login label{display:grid;gap:6px;font-size:.85em;color:var(--soft)}
-.login input{font:inherit;padding:12px;border-radius:8px;border:2px solid var(--line);background:var(--raise);color:var(--fg)}
-.login input:focus{outline:none;border-color:var(--accent)}
-.login button{font:inherit;font-weight:600;padding:12px;border-radius:8px;border:2px solid transparent;background:var(--accent);color:#fff;cursor:pointer}
-.login button:focus{outline:none;border-color:var(--fg)}
-.login button.sec{background:var(--raise);color:var(--soft);font-weight:500}
-.login .err{color:var(--crit);font-size:.85em;min-height:1.2em}
-.sync{font-family:var(--mono);font-size:.68em;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
-.sync.off{color:var(--crit)}
-.alert.ok{border-left-color:var(--ok)}
+.ic.r{border-color:rgba(255,77,77,.8)}
+.dupla{display:grid;gap:24px;align-items:center;margin-top:14px}
+.gauge .arco{filter:drop-shadow(0 0 6px #E65516)}
+.kv dd.w{color:var(--warn)} .kv dd.r{color:var(--crit)} .kv dd.pq{font-size:19px}
+.kv dd.nota{font-family:var(--ui);font-size:15px;text-align:left;color:var(--dim)}
+.pr-top{display:flex;align-items:baseline;justify-content:space-between;margin:16px 0 10px}
+.pr-top .big{font-size:38px}
+.pr-sub{display:flex;justify-content:space-between;margin-top:8px;font-size:17px;color:var(--dim)}
+.pr-sub .cy{color:var(--cy)} .pr-sub .lb{color:var(--lbl)}
+.eq{margin-top:16px}
+.rod .mais b{color:var(--lbl)}
+.rod{gap:16px!important;letter-spacing:.1em!important;white-space:nowrap;overflow:hidden}
+.tt small.r{color:var(--crit);text-shadow:0 0 8px rgba(255,77,77,.9)}
+.onda{width:100%;height:92px;margin-top:6px;display:block}
+.onda .brilho{filter:drop-shadow(0 0 5px #E65516)}
+.tiles .g{position:relative;height:182px}
+.tile .big.w{color:var(--warn)} .tile .big.r{color:var(--crit)}
+.tile svg{filter:drop-shadow(0 0 5px currentColor)}
+.hcanto.d b.w{color:var(--warn)} .hcanto.d b.r{color:var(--crit);text-shadow:0 0 8px var(--crit)}
+.base .st.r:before{background:var(--crit);box-shadow:0 0 8px var(--crit)}
+.base .st.w:before{background:var(--warn);box-shadow:0 0 8px var(--warn)}
+.base b.off,#sync.off{color:var(--crit)}
+#tela{-webkit-transform-origin:0 0}
+[hidden]{display:none!important}
+/* login */
+.login{position:fixed;top:0;right:0;bottom:0;left:0;z-index:20;display:-webkit-box;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse 50% 50% at 50% 50%,rgba(230,85,22,.16),transparent 70%),#0e0e10;font-size:18px}
+.login form{width:100%;max-width:440px;display:grid;gap:14px;padding:30px;background:linear-gradient(180deg,rgba(42,43,47,.96),rgba(22,22,24,.98));border:1.6px solid var(--mg);box-shadow:0 0 18px rgba(230,85,22,.45);clip-path:polygon(22px 0,100% 0,100% calc(100% - 22px),calc(100% - 22px) 100%,0 100%,0 22px)}
+.login h1{display:flex;align-items:center;gap:12px;margin:0 0 4px}
+.login h1 img{height:22px}
+.login p{color:var(--dim)}
+.login label{display:grid;gap:6px;letter-spacing:.12em;text-transform:uppercase;font-size:14px;color:var(--lbl)}
+.login input{font:inherit;font-size:18px;padding:12px;border:1.5px solid rgba(216,214,201,.3);background:rgba(14,14,16,.9);color:#fff;letter-spacing:0;text-transform:none}
+.login input:focus{outline:none;border-color:var(--mg);box-shadow:0 0 10px rgba(230,85,22,.5)}
+.login button{font:inherit;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:12px;border:1.5px solid transparent;background:var(--mg);color:#fff;cursor:pointer}
+.login button:focus{outline:none;border-color:#fff}
+.login button.sec{background:transparent;border-color:rgba(216,214,201,.35);color:var(--cy)}
+.login .err{color:var(--crit);min-height:1.2em;font-size:16px}
+/* modo leve: TV que não aguenta tudo */
+.leve .g{filter:none} .leve .scan,.leve #parts,.leve .eq i{display:none}
+.leve .eq{background:linear-gradient(0deg,rgba(230,85,22,.4),transparent)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 </head>
 <body>
 <div class="login" id="login" hidden>
   <form id="login-form" autocomplete="on">
-    <h1 class="brand"><svg class="kmark" viewBox="0 0 48 48" aria-hidden="true">
-        <path class="k-ink" d="M16,8 Q11,16 16,24 Q11,32 16,40" fill="none" stroke-width="2.6" stroke-linecap="round"/>
-        <path class="k-acc" d="M16,24 Q26,18 36,8 M16,24 Q26,30 36,40" fill="none" stroke-width="2.6" stroke-linecap="round"/>
-        <path class="k-line" d="M16,8 H7 M36,40 H45 M36,8 H45" fill="none" stroke-width="1.3" stroke-linecap="round"/>
-        <circle class="k-end" cx="5.5" cy="8" r="1.5"/><circle class="k-end" cx="46.5" cy="40" r="1.5"/><circle class="k-end" cx="46.5" cy="8" r="1.5"/>
-        <circle class="k-orbit" cx="16" cy="24" r="10.5" fill="none" stroke-width="1" stroke-dasharray="1.5 3"/>
-        <g class="k-spin"><circle class="k-sat" cx="26.5" cy="24" r="2"/></g>
-        <circle class="k-node" cx="16" cy="8" r="3.4"/>
-        <circle class="k-node" cx="16" cy="40" r="3.4"/>
-        <circle class="k-node k-hollow" cx="36" cy="40" r="3.4"/>
-        <circle class="k-dot" cx="36" cy="8" r="3.6"/>
-        <circle class="k-hub" cx="16" cy="24" r="6"/>
-      </svg><span class="bw"><img src="wordmark-linen.png" alt="Kaio Honorato" width="1598" height="116"><small>central</small></span></h1>
+    <h1><svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke-linecap="round" aria-hidden="true"><path d="M16,8 Q11,16 16,24 Q11,32 16,40" stroke="#F5F5F5" stroke-width="2.6"/><path d="M16,24 Q26,18 36,8 M16,24 Q26,30 36,40" stroke="#E65516" stroke-width="2.6"/><circle cx="16" cy="24" r="5" fill="#E65516"/><circle cx="36" cy="8" r="3.4" fill="#D8D6C9"/><circle cx="36" cy="40" r="3" stroke="#D8D6C9" stroke-width="1.6"/></svg><img src="wordmark-linen.png" alt="Kaio Honorato"></h1>
     <p>Entre uma vez. A TV continua conectada depois disso.</p>
     <label for="email">E-mail<input id="email" type="email" required autocapitalize="none" autocorrect="off" autocomplete="username" spellcheck="false" inputmode="email"></label>
     <label for="senha">Senha<input id="senha" type="password" required autocapitalize="none" autocorrect="off" autocomplete="current-password" spellcheck="false"></label>
@@ -158,76 +204,108 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
   </form>
 </div>
 
-<div class="wrap">
-  <div class="top">
-    <div class="brand"><svg class="kmark" viewBox="0 0 48 48" aria-hidden="true">
-        <path class="k-ink" d="M16,8 Q11,16 16,24 Q11,32 16,40" fill="none" stroke-width="2.6" stroke-linecap="round"/>
-        <path class="k-acc" d="M16,24 Q26,18 36,8 M16,24 Q26,30 36,40" fill="none" stroke-width="2.6" stroke-linecap="round"/>
-        <path class="k-line" d="M16,8 H7 M36,40 H45 M36,8 H45" fill="none" stroke-width="1.3" stroke-linecap="round"/>
-        <circle class="k-end" cx="5.5" cy="8" r="1.5"/><circle class="k-end" cx="46.5" cy="40" r="1.5"/><circle class="k-end" cx="46.5" cy="8" r="1.5"/>
-        <circle class="k-orbit" cx="16" cy="24" r="10.5" fill="none" stroke-width="1" stroke-dasharray="1.5 3"/>
-        <g class="k-spin"><circle class="k-sat" cx="26.5" cy="24" r="2"/></g>
-        <circle class="k-node" cx="16" cy="8" r="3.4"/>
-        <circle class="k-node" cx="16" cy="40" r="3.4"/>
-        <circle class="k-node k-hollow" cx="36" cy="40" r="3.4"/>
-        <circle class="k-dot" cx="36" cy="8" r="3.6"/>
-        <circle class="k-hub" cx="16" cy="24" r="6"/>
-      </svg><span class="bw"><img src="wordmark-linen.png" alt="Kaio Honorato" width="1598" height="116"><small>desenvolvedor</small></span><span class="tag-central">central · comercial · agentes · operação</span></div>
-    <div class="clock">
-      <span class="sync" id="sync">conectando…</span>
-      <span class="d" id="date">—</span>
-      <span class="t" id="time">--:--</span>
-    </div>
+<div id="tela">
+  <div class="grade"></div>
+  <div class="moldura"></div>
+  <div id="parts"></div>
+
+  <!-- topo -->
+  <div class="topo">
+    <div class="esq" id="topo-status">CENTRAL ONLINE <svg width="14" height="14" viewBox="0 0 24 24" style="fill:#E65516;filter:drop-shadow(0 0 4px #E65516)"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z"/></svg></div>
+    <div class="aba"><svg width="34" height="34" viewBox="0 0 48 48" fill="none" stroke-linecap="round"><path d="M16,8 Q11,16 16,24 Q11,32 16,40" stroke="#fff" stroke-width="2.6"/><path d="M16,24 Q26,18 36,8 M16,24 Q26,30 36,40" stroke="#E65516" stroke-width="2.6"/><circle cx="16" cy="24" r="5" fill="#E65516"/><circle cx="36" cy="8" r="3.4" fill="#D8D6C9"/><circle cx="36" cy="40" r="3" stroke="#D8D6C9" stroke-width="1.6"/></svg><img src="wordmark-linen.png" alt="Kaio Honorato"><span>CENTRAL</span></div>
+    <div class="dir"><span id="sync">CONECTANDO…</span>
+      <svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19" r="1.2" fill="#D8D6C9"/></svg>
+      <svg viewBox="0 0 24 24"><rect x="2" y="7" width="18" height="10" rx="2"/><path d="M22 10v4"/><rect x="4.5" y="9.5" width="11" height="5" fill="#D8D6C9" stroke="none"/></svg></div>
   </div>
 
-  <section class="attention" id="attention" aria-label="Precisa de você agora">
-    <h2>Precisa de você</h2>
-  </section>
+  <!-- ===== coluna esquerda ===== -->
+  <div class="g" style="left:28px;top:100px;width:520px;height:340px"><div class="pn"><div class="in">
+    <div class="tt"><svg viewBox="0 0 24 24"><path d="M3 13h5l2 3h4l2-3h5M5 5h14l2 8v6H3v-6z"/></svg>Caixa de entrada<small>OK 2× = RESPONDI</small></div>
+    <ul class="lista" id="inbox"></ul>
+    <div class="rod" id="inbox-counts"></div>
+  </div></div></div>
 
-  <main class="cols">
-    <div class="col">
-      <section class="box inbox">
-        <header><h3>Caixa de entrada<em>esperando você · OK 2× = respondi</em></h3><span class="src live">Gmail · WhatsApp · site</span></header>
-        <ul class="rows" id="inbox"></ul>
-        <div class="counts" id="inbox-counts"></div>
-      </section>
-
-      <section class="box">
-        <header><h3>Leads<em>status Lead no Notion</em></h3><span class="src live">Notion</span></header>
-        <ul class="rows" id="leads"></ul>
-        <div class="funnel" id="funnel"></div>
-        <div class="prosp" id="prosp" hidden></div>
-      </section>
+  <div class="g c" style="left:28px;top:460px;width:520px;height:250px"><div class="pn"><div class="in">
+    <div class="tt"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/></svg>Leads<small>NOTION</small></div>
+    <div class="dupla" style="grid-template-columns:170px 1fr">
+      <div class="gauge" style="width:170px;height:170px" id="g-leads"></div>
+      <dl class="kv" id="kv-leads"></dl>
     </div>
+  </div></div></div>
 
-    <div class="col">
-      <section class="box">
-        <header><h3>Supervisor dos agentes<em>hoje</em></h3><span class="src live">IA lendo as conversas</span></header>
-        <ul class="rows" id="supervisor"></ul>
-      </section>
-      <section class="box">
-        <header><h3>Iris no WhatsApp<em>hoje</em></h3><span class="src live">Evolution</span></header>
-        <ul class="rows" id="iris"></ul>
-      </section>
-      <section class="box">
-        <header><h3>Projetos</h3><span class="src live">Notion</span></header>
-        <ul class="rows" id="projetos"></ul>
-      </section>
+  <div class="g" style="left:28px;top:730px;width:520px;height:262px"><div class="pn"><div class="in">
+    <div class="tt"><svg viewBox="0 0 24 24"><path d="M5 15c-1.5 1.5-2 5-2 5s3.5-.5 5-2M9 15l-3-3c1-4 5-9 13-9 0 8-5 12-9 13z"/><circle cx="15" cy="9" r="1.6"/></svg>Prospecção<small>LISTA DE DISPARO</small></div>
+    <div class="pr-top"><span class="lbl">Enviados</span><span class="big" id="pr-pct">0%</span></div>
+    <div class="barra"><i id="pr-bar" style="width:2%"></i></div>
+    <div class="pr-sub" id="pr-sub"></div>
+    <div class="eq" id="eq"></div>
+  </div></div></div>
+
+  <!-- ===== centro ===== -->
+  <div class="g hero" style="left:568px;top:100px;width:784px;height:470px"><div class="pn"><div class="in" style="background:linear-gradient(180deg,#121214,#1c1714)">
+    <div class="rxp" id="rx"><svg id="nodes" viewBox="0 0 500 500" aria-hidden="true">
+    <defs>
+      <radialGradient id="disco" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#2e2522"/><stop offset=".55" stop-color="#1e1e21"/><stop offset="1" stop-color="#141416"/></radialGradient>
+      <linearGradient id="a1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A4C"/><stop offset="1" stop-color="#E65516"/></linearGradient>
+      <linearGradient id="a2" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5F5F5"/><stop offset="1" stop-color="#D8D6C9" stop-opacity=".35"/></linearGradient>
+      <filter id="gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="16"/></filter>
+      <filter id="neon" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    
+    <circle cx="250" cy="250" r="236" fill="url(#disco)"/>
+    <circle cx="250" cy="250" r="236" fill="none" stroke="#E65516" stroke-width="1.6" opacity=".8" filter="url(#neon)"/>
+    <circle id="halo" cx="250" cy="250" r="150" fill="#E65516" opacity=".22" filter="url(#gl)"/>
+    <g id="ticks" stroke="#D8D6C9" opacity=".6"></g>
+    <circle cx="250" cy="250" r="212" fill="none" stroke="#D8D6C9" stroke-opacity=".25" stroke-width="1" stroke-dasharray="1 5"/>
+    <circle id="rA" cx="250" cy="250" r="196" fill="none" stroke="url(#a1)" stroke-width="9" stroke-linecap="round" stroke-dasharray="330 80 150 672" filter="url(#neon)"/>
+    <circle id="rB" cx="250" cy="250" r="174" fill="none" stroke="url(#a2)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="0 520 210 363" filter="url(#neon)"/>
+    <circle id="rD" cx="250" cy="250" r="152" fill="none" stroke="#E65516" stroke-opacity=".55" stroke-width="1.2" stroke-dasharray="40 8 6 8"/>
+    <g id="rC"><circle cx="250" cy="250" r="128" fill="none" stroke="#E65516" stroke-width="2.4" stroke-dasharray="160 40" filter="url(#neon)"/>
+      <circle cx="250" cy="122" r="6" fill="#FF8A4C" filter="url(#neon)"/><circle cx="361" cy="314" r="5" fill="#F5F5F5"/><circle cx="139" cy="314" r="5" fill="#F5F5F5"/></g>
+    <circle cx="250" cy="250" r="110" fill="#26272b" stroke="#E65516" stroke-opacity=".6" stroke-width="1.5"/>
+    <circle id="wave" cx="250" cy="250" r="100" fill="none" stroke="#FF8A4C" stroke-width="3" opacity="0" filter="url(#neon)"/>
+  </svg>
+  <canvas id="neu"></canvas></div>
+    <div class="hcanto e"><div class="dia" id="h-dia">—</div><div class="t" id="h-t">--:--</div><div class="dt" id="h-dt">—</div></div>
+    <div class="hcanto d">
+      <div class="ln"><span>Iris</span><b class="on" id="hd-ia">ONLINE</b></div>
+      <div class="ln"><span>Sinapses</span><b id="lbl-sin">84</b></div>
+      <div class="ln"><span>Respostas hoje</span><b id="hd-resp">0</b></div>
+      <div class="ln"><span>Esperando você</span><b id="hd-esp">0</b></div>
     </div>
+    <svg class="cantos" viewBox="0 0 784 470" preserveAspectRatio="none"><g fill="none" stroke="#E65516" stroke-width="2"><path d="M24,70 V24 H70"/><path d="M714,24 H760 V70"/><path d="M760,400 V446 H714"/><path d="M70,446 H24 V400"/></g></svg>
+  </div></div></div>
 
-    <div class="col">
-      <section class="box">
-        <header><h3>Sistemas no ar</h3><span class="src live">vigia · a cada 5 min</span></header>
-        <ul class="rows" id="sistemas"></ul>
-      </section>
-      <section class="box cobr">
-        <header><h3>Cobrança<em>automações e agentes</em></h3><span class="src live">Asaas</span></header>
-        <div class="funnel" id="cobr-funil"></div>
-        <ul class="rows" id="cobranca"></ul>
-      </section>
+  <div class="g c" style="left:568px;top:590px;width:784px;height:200px"><div class="pn"><div class="in">
+    <div class="tt"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg>Atividade da Iris<small id="at-sub">HOJE</small></div>
+    <svg class="onda" viewBox="0 0 744 92" id="onda"></svg>
+    <div class="dias" id="horas"></div>
+  </div></div></div>
 
+  <div class="tiles" style="left:568px;top:810px;width:784px;height:182px" id="tiles"></div>
+
+  <!-- ===== coluna direita ===== -->
+  <div class="g" style="left:1372px;top:100px;width:520px;height:300px"><div class="pn"><div class="in">
+    <div class="tt"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4"/></svg>Precisa de você<small id="pv-n">—</small></div>
+    <ul class="lista" id="precisa"></ul>
+    <div class="rod" id="pv-rod"></div>
+  </div></div></div>
+
+  <div class="g c" style="left:1372px;top:420px;width:520px;height:290px"><div class="pn"><div class="in">
+    <div class="tt"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="1"/><path d="M3 10h18M7 15h4"/></svg>Cobrança<small>ASAAS</small></div>
+    <div class="dupla" style="grid-template-columns:190px 1fr">
+      <div class="gauge" style="width:190px;height:190px" id="g-cobr"></div>
+      <dl class="kv" id="kv-cobr"></dl>
     </div>
-  </main>
+  </div></div></div>
+
+  <div class="g" style="left:1372px;top:730px;width:520px;height:262px"><div class="pn"><div class="in">
+    <div class="tt"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>Sistemas no ar<small>VIGIA · 5 MIN</small></div>
+    <ul class="lista compacto" id="sistemas"></ul>
+  </div></div></div>
+
+  <div class="base"><span class="st" id="st-sb">Supabase</span><span class="st" id="st-n8n">n8n</span><span class="st" id="st-evo">Evolution</span><span class="st" id="st-gm">Gmail</span><span class="sp"></span><span><b>KAIO HONORATO</b> · DESENVOLVEDOR</span><span class="sp"></span><span id="base-sync">CONECTANDO…</span></div>
+  <div class="scan"></div>
 </div>
 
 <script>
@@ -239,11 +317,12 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
   var INTERVALO = 30000;          // busca dados novos a cada 30 s
   var CHAVE = 'central_sessao';
   var FUSO = 'America/Sao_Paulo';   // a box pode estar em outro fuso
-  var VERSAO = '2026-10-24-2';      // mude a cada publicação: a TV se atualiza sozinha
+  var VERSAO = '2026-10-25-1';      // mude a cada publicação: a TV se atualiza sozinha
 
   var $ = function (id) { return document.getElementById(id); };
+  var reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   var sessao = ler();
-  var dados = null;
+  var dados = null, online = false; $('topo-status').firstChild.nodeValue = 'SEM CONEXÃO ';
 
   // ---------- sessão ----------
   function ler() { try { return JSON.parse(localStorage.getItem(CHAVE)) || null; } catch (e) { return null; } }
@@ -252,10 +331,8 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
     try { if (s) localStorage.setItem(CHAVE, JSON.stringify(s)); else localStorage.removeItem(CHAVE); } catch (e) {}
   }
   function guardarToken(r) {
-    salvar({ access_token: r.access_token, refresh_token: r.refresh_token,
-             expira: Date.now() + (r.expires_in || 3600) * 1000 - 60000 });
+    salvar({ access_token: r.access_token, refresh_token: r.refresh_token, expira: Date.now() + (r.expires_in || 3600) * 1000 - 60000 });
   }
-
   function requisicao(metodo, url, corpo, token) {
     return new Promise(function (ok, falha) {
       var x = new XMLHttpRequest();
@@ -272,60 +349,69 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
       x.send(corpo ? JSON.stringify(corpo) : null);
     });
   }
-
   function entrar(email, senha) {
-    return requisicao('POST', SUPABASE_URL + '/auth/v1/token?grant_type=password', { email: email, password: senha })
-      .then(guardarToken);
+    return requisicao('POST', SUPABASE_URL + '/auth/v1/token?grant_type=password', { email: email, password: senha }).then(guardarToken);
   }
   function renovar() {
     if (!sessao || !sessao.refresh_token) return Promise.reject({ status: 401 });
-    return requisicao('POST', SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', { refresh_token: sessao.refresh_token })
-      .then(guardarToken);
+    return requisicao('POST', SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', { refresh_token: sessao.refresh_token }).then(guardarToken);
   }
   function tokenValido() {
     if (!sessao) return Promise.reject({ status: 401 });
     if (Date.now() < sessao.expira) return Promise.resolve(sessao.access_token);
     return renovar().then(function () { return sessao.access_token; });
   }
-  function api(caminho) {
-    return tokenValido().then(function (t) {
-      return requisicao('GET', SUPABASE_URL + '/rest/v1/' + caminho, null, t);
-    });
-  }
-
-  function rpc(nome, corpo) {
-    return tokenValido().then(function (t) {
-      return requisicao('POST', SUPABASE_URL + '/rest/v1/rpc/' + nome, corpo, t);
-    });
-  }
+  function api(caminho) { return tokenValido().then(function (t) { return requisicao('GET', SUPABASE_URL + '/rest/v1/' + caminho, null, t); }); }
+  function rpc(nome, corpo) { return tokenValido().then(function (t) { return requisicao('POST', SUPABASE_URL + '/rest/v1/rpc/' + nome, corpo, t); }); }
 
   // ---------- utilidades ----------
   function esc(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
   }
   function minutosDesde(iso) { return Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60000)); }
   function espera(min) {
     if (min < 60) return min + ' min';
-    if (min < 1440) return Math.floor(min / 60) + ' h ' + (min % 60) + ' min';
+    if (min < 1440) return Math.floor(min / 60) + 'h ' + (min % 60 < 10 ? '0' : '') + (min % 60);
     var d = Math.floor(min / 1440); return d + (d === 1 ? ' dia' : ' dias');
   }
-  function nivel(min, prazo) { return min >= prazo ? 'c' : (min >= prazo / 2 ? 'w' : ''); }
+  function nivel(min, prazo) { return min >= prazo ? 'r' : (min >= prazo / 2 ? 'w' : ''); }
   function real(v) { return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
-  function dataCurta(iso) {
-    var p = String(iso).slice(0, 10).split('-'); return p[2] + '/' + p[1];
-  }
+  function dataCurta(iso) { var p = String(iso).slice(0, 10).split('-'); return p[2] + '/' + p[1]; }
   function hojeISO() {
-    var ymd = new Date().toLocaleDateString('en-CA', { timeZone: FUSO });   // AAAA-MM-DD em Brasília
+    var ymd = new Date().toLocaleDateString('en-CA', { timeZone: FUSO });
     return new Date(ymd + 'T00:00:00-03:00').toISOString();
   }
-  function linha(dot, titulo, sub, lado, ladoClasse, extraHtml) {
-    return '<li class="row" tabindex="0"><span class="dot ' + (dot || '') + '"></span><div class="main"><strong>' + titulo +
-      '</strong>' + (extraHtml || ('<small>' + sub + '</small>')) + '</div><span class="side ' + (ladoClasse || '') + '">' + lado + '</span></li>';
+  function horaBR(iso) { return new Date(iso).toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' }); }
+  function horaNum(iso) { return Number(new Date(iso).toLocaleTimeString('en-GB', { timeZone: FUSO, hour: '2-digit', hour12: false }).slice(0, 2)); }
+  var ROTULO = { cliente: 'cliente', lead: 'lead', cobranca: 'cobrança', suporte: 'suporte', aviso: 'aviso', newsletter: 'newsletter', spam: 'spam', outro: 'outro' };
+  var ICON = {
+    wa: '<path d="M4 20l1.3-4A8 8 0 1 1 8 18.7z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 1c-1-.5-2-1.5-2.5-2.5l1-1-1-2z"/>',
+    site: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
+    mail: '<rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 7l9 6 9-6"/>',
+    card: '<rect x="3" y="6" width="18" height="13" rx="1"/><path d="M3 10h18"/>',
+    ok: '<path d="M5 12l4 4 10-10"/>',
+    x: '<path d="M6 6l12 12M18 6L6 18"/>',
+    alerta: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/>',
+    chat: '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h8M8 13h5"/>',
+    eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    box: '<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+    fluxo: '<circle cx="5" cy="12" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="19" cy="18" r="2.5"/><path d="M7.5 12h4l5-6M11.5 12l5 6"/>'
+  };
+  function svg(ic) { return '<svg viewBox="0 0 24 24">' + ICON[ic] + '</svg>'; }
+  // uma linha de lista; foca com o controle remoto
+  function item(ic, cls, titulo, sub, lado, ladoCls, extra) {
+    return '<li class="row it" tabindex="0"' + (extra || '') + '><div class="ic ' + (cls || '') + '">' + svg(ic) + '</div><div class="tx"><b>' + titulo + '</b><span>' + sub + '</span></div><i class="side ' + (ladoCls || '') + '">' + lado + '</i></li>';
   }
-  var ROTULO = { cliente: 'cliente', lead: 'lead', cobranca: 'cobrança', suporte: 'suporte', aviso: 'aviso',
-                 newsletter: 'newsletter', spam: 'spam', outro: 'outro' };
+  function gauge(el, pct, txt, rot, cor1, cor2) {
+    var w = el.offsetWidth || 170, r = w / 2 - 12, c = 2 * Math.PI * r, id = el.id + 'g';
+    pct = Math.max(0, Math.min(1, pct || 0));
+    el.innerHTML = '<svg viewBox="0 0 ' + w + ' ' + w + '"><defs><linearGradient id="' + id + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + cor1 + '"/><stop offset="1" stop-color="' + cor2 + '"/></linearGradient></defs>' +
+      '<circle cx="' + w / 2 + '" cy="' + w / 2 + '" r="' + r + '" fill="none" stroke="rgba(216,214,201,.14)" stroke-width="12"/>' +
+      '<circle cx="' + w / 2 + '" cy="' + w / 2 + '" r="' + (r - 14) + '" fill="none" stroke="rgba(216,214,201,.25)" stroke-width="1" stroke-dasharray="2 4"/>' +
+      (pct > 0 ? '<circle cx="' + w / 2 + '" cy="' + w / 2 + '" r="' + r + '" fill="none" stroke="url(#' + id + ')" stroke-width="12" stroke-linecap="round" stroke-dasharray="' + Math.max(1, c * pct).toFixed(1) + ' ' + c.toFixed(1) + '" class="arco"/>' : '') +
+      '</svg><div class="v"><small>' + rot + '</small><span class="big" style="font-size:' + Math.round(w * (String(txt).length > 3 ? .2 : .24)) + 'px">' + txt + '</span></div>';
+  }
 
   // ---------- busca ----------
   function carregar() {
@@ -345,241 +431,194 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
     ]).then(function (r) {
       var prazos = {}; (r[4] || []).forEach(function (p) { prazos[p.categoria] = p.minutos; });
       dados = { inbox: r[0] || [], hoje: r[1] || [], leads: r[2] || [], projetos: r[3] || [], prazos: prazos, wa: r[5] || [], pausas: r[6] || [], sistemas: r[7] || [], eventos: r[8] || [], revisoes: r[9] || [], prosp: r[10] || [], cobr: r[11] || [] };
-      desenhar();
-      $('sync').className = 'sync';
-      $('sync').textContent = 'atualizado ' + new Date().toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
+      online = true; desenhar(); $('topo-status').firstChild.nodeValue = 'CENTRAL ONLINE ';
+      var h = new Date().toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
+      $('sync').textContent = 'SYNC ' + h; $('sync').className = '';
+      $('base-sync').innerHTML = 'ATUALIZADO <b>' + h + '</b>';
     }, function (e) {
       if (e && (e.status === 401 || e.status === 400 || e.status === 403)) { salvar(null); mostrarLogin(); return; }
-      $('sync').className = 'sync off';
-      $('sync').textContent = 'sem conexão · tentando de novo';
+      online = false; $('topo-status').firstChild.nodeValue = 'SEM CONEXÃO ';
+      $('sync').textContent = 'SEM CONEXÃO'; $('sync').className = 'off';
+      $('base-sync').innerHTML = '<b class="off">SEM CONEXÃO · TENTANDO DE NOVO</b>';
+      $('st-sb').className = 'st r';
     });
   }
 
   // ---------- desenho ----------
   function desenhar() {
     if (!dados) return;
-    var alertas = [];
+    var alertas = [], html = '';
 
     // Caixa de entrada
-    var html = '';
-    dados.inbox.forEach(function (m) {
+    var MOSTRA = 3;
+    dados.inbox.slice(0, MOSTRA).forEach(function (m) {
       var min = minutosDesde(m.recebido_em), prazo = m.prazo_minutos || 60, n = nivel(min, prazo);
-      var canal = m.canal === 'whatsapp' ? '<span class="ch wa">WA</span>' : (m.canal === 'site' ? '<span class="ch st">SITE</span>' : '<span class="ch em">E-MAIL</span>');
+      var ic = m.canal === 'whatsapp' ? 'wa' : (m.canal === 'site' ? 'site' : 'mail');
       var quente = m.categoria === 'cliente' || m.categoria === 'lead';
-      var titulo = canal + esc(m.remetente_nome || m.remetente_contato || 'Sem nome') +
-        '<span class="tag' + (quente ? ' hot' : '') + '">' + esc(ROTULO[m.categoria] || m.categoria) + '</span>';
-      var texto = m.resumo ? esc(m.resumo) : esc(m.trecho);
-      if (m.assunto) texto = 'Assunto: ' + esc(m.assunto) + ' · ' + texto;
-      html += linha(n, titulo, '', espera(min), n, '<p>' + texto + '</p>').replace('<li class="row"', '<li class="row inb" data-id="' + esc(m.id) + '"');
-      if (n === 'c') alertas.push({ n: espera(min), c: 'c', t: esc(m.remetente_nome || m.remetente_contato) + ' esperando resposta',
-                                     s: ({ whatsapp: 'WhatsApp', site: 'Formulário do site', email: 'E-mail' }[m.canal] || 'E-mail') + ' · ' + esc(ROTULO[m.categoria]) });
+      var sub = (m.assunto ? esc(m.assunto) + ' · ' : '') + esc(m.resumo || m.trecho || '');
+      html += item(ic, n, esc(m.remetente_nome || m.remetente_contato || 'Sem nome') + '<em class="tag' + (quente ? ' hot' : '') + '">' + esc(ROTULO[m.categoria] || m.categoria || '') + '</em>', sub, espera(min), n || 'cy', ' data-id="' + esc(m.id) + '"').replace('class="row it"', 'class="row it inb"');
     });
-    $('inbox').innerHTML = html || linha('', 'Nada esperando você', 'Tudo que chegou hoje já foi respondido ou não precisa de resposta', 'ok', '');
+    dados.inbox.forEach(function (m) {
+      var min = minutosDesde(m.recebido_em), prazo = m.prazo_minutos || 60;
+      if (min >= prazo) alertas.push({ c: 'r', ic: m.canal === 'whatsapp' ? 'wa' : (m.canal === 'site' ? 'site' : 'mail'), t: esc(m.remetente_nome || m.remetente_contato) + ' esperando', s: ({ whatsapp: 'WhatsApp', site: 'Site', email: 'E-mail' }[m.canal] || 'E-mail') + ' · ' + esc(ROTULO[m.categoria] || '') + ' · ' + espera(min) });
+    });
+    $('inbox').innerHTML = html || item('ok', '', 'Nada esperando você', 'Tudo que chegou hoje já foi respondido', 'OK', 'cy');
     var cont = { respondidas: 0, newsletter: 0, spam: 0, aviso: 0 };
-    dados.hoje.forEach(function (m) {
-      if (m.respondido_em) cont.respondidas++;
-      else if (cont.hasOwnProperty(m.categoria)) cont[m.categoria]++;
-    });
-    $('inbox-counts').innerHTML = '<span>hoje</span><span>' + cont.respondidas + ' respondidas</span><span>' +
-      cont.aviso + ' avisos</span><span>' + cont.newsletter + ' newsletters</span><span>' + cont.spam + ' spam</span>';
+    dados.hoje.forEach(function (m) { if (m.respondido_em) cont.respondidas++; else if (cont.hasOwnProperty(m.categoria)) cont[m.categoria]++; });
+    var mais = dados.inbox.length - MOSTRA;
+    $('inbox-counts').innerHTML = (mais > 0 ? '<span class="mais"><b>+' + mais + '</b>esperando</span>' : '') + '<span><b>' + cont.respondidas + '</b>respondidas</span><span><b>' + cont.aviso + '</b>avisos</span><span><b>' + cont.newsletter + '</b>news</span><span><b>' + cont.spam + '</b>spam</span>';
 
     // Leads
-    html = ''; var semNome = 0, prazoLead = dados.prazos.lead || 30;
-    var abertos = dados.leads.filter(function (l) { return l.status === 'Lead'; });
-    abertos.forEach(function (l) {
-      if (!l.nome && !l.empresa) { semNome++; return; }
-      var min = l.primeiro_contato ? minutosDesde(l.primeiro_contato) : 0, n = l.primeiro_contato ? nivel(min, prazoLead) : '';
-      var sub = [l.origem, l.segmento, l.observacoes].filter(Boolean).map(esc).join(' · ') || 'Sem detalhes no Notion';
-      html += linha(n, esc(l.nome || l.empresa) + (l.nome && l.empresa ? ' · ' + esc(l.empresa) : ''), sub,
-                    l.primeiro_contato ? espera(min) : '—', n);
-    });
-    if (semNome) {
-      html += linha('g', semNome + (semNome === 1 ? ' lead sem nome' : ' leads sem nome'), 'Clientes com status Lead e campos vazios no Notion', 'revisar', '');
-      alertas.push({ n: semNome, c: 'w', t: semNome === 1 ? 'Lead sem nome no Notion' : 'Leads sem nome no Notion', s: 'Notion · Clientes' });
-    }
-    $('leads').innerHTML = html || linha('', 'Nenhum lead em aberto', 'Quando o funil gravar no Notion, ele aparece aqui', 'ok', '');
     var conta = function (st) { return dados.leads.filter(function (l) { return st.indexOf(l.status) >= 0; }).length; };
-    $('funnel').innerHTML =
-      '<div class="stage"><b>' + conta(['Lead']) + '</b><span>Leads</span></div>' +
-      '<div class="stage"><b>' + conta(['Proposta enviada']) + '</b><span>Proposta</span></div>' +
-      '<div class="stage hl"><b>' + conta(['Ativo']) + '</b><span>Ativos</span></div>' +
-      '<div class="stage"><b>' + conta(['Concluído']) + '</b><span>Concluídos</span></div>';
+    var abertos = dados.leads.filter(function (l) { return l.status === 'Lead'; });
+    var semNome = abertos.filter(function (l) { return !l.nome && !l.empresa; }).length;
+    if (semNome) alertas.push({ c: 'w', ic: 'user', t: semNome === 1 ? 'Lead sem nome no Notion' : semNome + ' leads sem nome no Notion', s: 'Notion · Clientes' });
+    var prazoLead = dados.prazos.lead || 30, maisAntigo = 0;
+    abertos.forEach(function (l) { if (l.primeiro_contato) maisAntigo = Math.max(maisAntigo, minutosDesde(l.primeiro_contato)); });
+    var fechados = conta(['Ativo', 'Concluído']), total = dados.leads.length;
+    gauge($('g-leads'), total ? fechados / total : 0, String(abertos.length), 'Abertos', '#E65516', '#D8D6C9');
+    $('kv-leads').innerHTML = '<dt>Proposta</dt><dd>' + conta(['Proposta enviada']) + '</dd><dt>Ativos</dt><dd>' + conta(['Ativo']) + '</dd><dt>Concluídos</dt><dd>' + conta(['Concluído']) + '</dd>' +
+      '<dt>Mais antigo</dt><dd class="' + (abertos.length ? nivel(maisAntigo, prazoLead) : '') + '">' + (abertos.length && maisAntigo ? espera(maisAntigo) : '—') + '</dd>';
 
-    // Prospecção (Lista de disparo do Notion)
+    // Prospecção
     var pr = dados.prosp || [];
-    if (pr.length) {
-      var pc = function (st) { return pr.filter(function (x) { return st.indexOf(x.status) >= 0; }).length; };
-      var porNicho = {}; pr.forEach(function (x) { var k = x.nicho || 'outros'; porNicho[k] = (porNicho[k] || 0) + 1; });
-      var NOME_NICHO = { psicologa: 'psicologia', fisioterapeuta: 'fisioterapia', 'agência de marketing': 'agências' };
-      var cel = pr.filter(function (x) { return x.tipo_telefone === 'Celular'; }).length;
-      $('prosp').innerHTML = '<h4>Prospecção<em>' + pr.length + ' na lista de disparo</em></h4>' +
-        '<div class="funnel">' +
-        '<div class="stage"><b>' + pc(['Aguardando']) + '</b><span>Aguardando</span></div>' +
-        '<div class="stage"><b>' + pc(['Na fila']) + '</b><span>Na fila</span></div>' +
-        '<div class="stage"><b>' + pc(['Enviando', 'Enviado']) + '</b><span>Enviados</span></div>' +
-        '<div class="stage hl"><b>' + pc(['Respondeu']) + '</b><span>Responderam</span></div></div>' +
-        '<div class="counts">' + Object.keys(porNicho).sort().map(function (k) { return '<span>' + esc(NOME_NICHO[k] || k) + ' ' + porNicho[k] + '</span>'; }).join('') +
-        '<span>' + cel + ' com celular</span></div>';
-      $('prosp').hidden = false;
-    } else { $('prosp').hidden = true; }
+    var pc = function (st) { return pr.filter(function (x) { return st.indexOf(x.status) >= 0; }).length; };
+    var enviados = pc(['Enviando', 'Enviado', 'Respondeu']), pp = pr.length ? Math.round(enviados / pr.length * 100) : 0;
+    $('pr-pct').textContent = pp + '%'; $('pr-bar').style.width = Math.max(2, pp) + '%';
+    $('pr-sub').innerHTML = '<span>' + enviados + ' / ' + pr.length + '</span><span class="cy">' + pc(['Na fila']) + ' na fila</span><span class="lb">' + pc(['Respondeu']) + ' responderam</span>';
 
-    // Cobrança (Asaas): só automações e agentes de IA
-    var cb = dados.cobr || [];
-    var cc = function (st) { return cb.filter(function (x) { return x.status === st; }).length; };
-    $('cobr-funil').innerHTML =
-      '<div class="stage ok"><b>' + cc('em_dia') + '</b><span>Em dia</span></div>' +
-      '<div class="stage' + (cc('atrasado') ? ' w' : '') + '"><b>' + cc('atrasado') + '</b><span>Atrasados</span></div>' +
-      '<div class="stage' + (cc('pausado') ? ' c' : '') + '"><b>' + cc('pausado') + '</b><span>Pausados</span></div>';
-    html = '';
-    cb.filter(function (x) { return x.status === 'pausado' || x.status === 'atrasado'; })
-      .sort(function (a, b) { return b.dias_atraso - a.dias_atraso; }).forEach(function (x) {
-        var pausado = x.status === 'pausado';
-        var falta = 8 - x.dias_atraso;
-        var sub = (x.valor != null ? real(x.valor) + ' · ' : '') + x.dias_atraso + (x.dias_atraso === 1 ? ' dia' : ' dias') + ' de atraso' +
-          (pausado ? ' · religa sozinho quando pagar' : (x.segurar_ate ? ' · pausa segurada até ' + dataCurta(x.segurar_ate) : (falta > 0 ? ' · pausa em ' + falta + (falta === 1 ? ' dia' : ' dias') : '')));
-        html += linha(pausado ? 'c' : 'w', esc(x.projeto || 'Sem nome'), sub, pausado ? 'pausado' : 'atrasado', pausado ? 'c' : 'w');
-        if (pausado) alertas.push({ n: x.dias_atraso + 'd', c: 'c', t: esc(x.projeto) + ' pausado por falta de pagamento', s: 'Cobrança · Asaas' });
-        else if (x.dias_atraso >= 5 && !x.segurar_ate) alertas.push({ n: x.dias_atraso + 'd', c: 'w', t: esc(x.projeto) + ' pausa em ' + falta + (falta === 1 ? ' dia' : ' dias'), s: 'Cobrança · mensalidade em aberto' });
-      });
-    if (!cb.length) html = linha('g', 'Nenhuma mensalidade no Asaas', 'Preencha Assinatura Asaas e Chave do cliente no projeto', '—', '');
-    else if (!html) html = linha('', 'Todos os pagamentos em dia', cb.length + (cb.length === 1 ? ' assinatura ativa' : ' assinaturas ativas'), '✓', '');
-    $('cobranca').innerHTML = html;
-
-    // Projetos
-    html = ''; var incompletos = 0, mensal = 0, hojeDia = Number(new Date().toLocaleDateString('en-CA', { timeZone: FUSO }).slice(8, 10));
-    var proximas = [];
-    var nProj = 0, projOcultos = 0;
-    var ordemProj = { 'Em construção': 0, 'Testes e ajustes': 1, 'Proposta': 2, 'No ar': 3, 'Pausado': 4 };
-    dados.projetos.slice().sort(function (a, b) { return (ordemProj[a.status] == null ? 9 : ordemProj[a.status]) - (ordemProj[b.status] == null ? 9 : ordemProj[b.status]); }).forEach(function (p) {
-      var falta = [];
-      if (p.valor == null) falta.push('sem valor');
-      if (!p.entrega) falta.push('sem entrega');
-      var atrasado = p.entrega && p.status !== 'No ar' && p.status !== 'Pausado' && new Date(p.entrega + 'T23:59:59') < new Date();
-      var n = atrasado ? 'c' : (falta.length && p.status !== 'No ar' ? 'w' : (p.status === 'Pausado' ? 'g' : ''));
-      if (falta.length && p.status !== 'No ar') incompletos++;
-      if (atrasado) alertas.push({ n: dataCurta(p.entrega), c: 'c', t: esc(p.nome) + ' passou da entrega', s: 'Notion · Projetos · ' + esc(p.status) });
-      var sub = [esc(p.tipo || 'Sem tipo'), p.valor != null ? real(p.valor) : null, p.entrega ? 'entrega ' + dataCurta(p.entrega) : null]
-        .concat(falta).filter(Boolean).join(' · ');
-      if (nProj < 4) html += linha(n, esc(p.nome || 'Sem nome'), sub, esc(p.status || '—'), atrasado ? 'c' : ''); else projOcultos++;
-      nProj++;
-      if (p.mensalidade) {
-        mensal += Number(p.mensalidade);
-        if (p.dia_cobranca) {
-          var dias = (p.dia_cobranca - hojeDia + 31) % 31;
-          if (dias <= 10) proximas.push(esc(p.nome) + ' dia ' + p.dia_cobranca);
-        }
-      }
+    // Cobrança
+    var cb = dados.cobr || [], cc = function (st) { return cb.filter(function (x) { return x.status === st; }).length; };
+    var mensal = cb.reduce(function (s, x) { return s + Number(x.valor || 0); }, 0);
+    gauge($('g-cobr'), cb.length ? cc('em_dia') / cb.length : 0, cb.length ? Math.round(cc('em_dia') / cb.length * 100) + '%' : '—', 'Em dia', '#E65516', '#D8D6C9');
+    $('kv-cobr').innerHTML = cb.length
+      ? '<dt>Em dia</dt><dd>' + cc('em_dia') + '</dd><dt>Atrasados</dt><dd class="' + (cc('atrasado') ? 'w' : '') + '">' + cc('atrasado') + '</dd><dt>Pausados</dt><dd class="' + (cc('pausado') ? 'r' : '') + '">' + cc('pausado') + '</dd><dt>Mensal</dt><dd class="pq">' + real(mensal) + '</dd>'
+      : '<dt>Assinaturas</dt><dd>0</dd><dd class="nota" style="grid-column:1/-1">Preencha Assinatura Asaas e Chave do cliente no projeto do Notion</dd>';
+    cb.forEach(function (x) {
+      var falta = 8 - x.dias_atraso;
+      if (x.status === 'pausado') alertas.push({ c: 'r', ic: 'card', t: esc(x.projeto) + ' pausado', s: 'Cobrança · ' + x.dias_atraso + ' dias de atraso · religa quando pagar' });
+      else if (x.status === 'atrasado' && x.dias_atraso >= 5 && !x.segurar_ate) alertas.push({ c: 'w', ic: 'card', t: esc(x.projeto) + ' · ' + x.dias_atraso + ' dias de atraso', s: 'Cobrança · pausa em ' + falta + (falta === 1 ? ' dia' : ' dias') });
     });
-    if (projOcultos) html += linha('g', '+' + projOcultos + (projOcultos === 1 ? ' projeto' : ' projetos'), 'Veja todos no Notion', '', '');
-    html += mensal
-      ? linha('', 'Mensalidades · ' + real(mensal) + '/mês', proximas.length ? 'Próximos 10 dias: ' + proximas.join(', ') : 'Nenhuma cobrança nos próximos 10 dias', '', '')
-      : linha('g', 'Mensalidades', 'Nenhuma cadastrada · preencha Mensalidade e Dia da cobrança', '—', '');
-    if (incompletos) alertas.push({ n: incompletos, c: 'w', t: incompletos === 1 ? 'Projeto sem valor ou data de entrega' : 'Projetos sem valor ou data de entrega', s: 'Notion · Projetos' });
-    $('projetos').innerHTML = html;
+
+    // Projetos (resumo no bloco do centro + alertas)
+    var incompletos = 0, ativosProj = 0, noAr = 0;
+    dados.projetos.forEach(function (p) {
+      if (p.status === 'No ar') noAr++;
+      if (p.status === 'Em construção' || p.status === 'Testes e ajustes') ativosProj++;
+      var falta = (p.valor == null) || !p.entrega;
+      if (falta && p.status !== 'No ar' && p.status !== 'Pausado') incompletos++;
+      if (p.entrega && p.status !== 'No ar' && p.status !== 'Pausado' && new Date(p.entrega + 'T23:59:59') < new Date()) alertas.push({ c: 'r', ic: 'box', t: esc(p.nome) + ' passou da entrega', s: 'Projetos · entrega ' + dataCurta(p.entrega) + ' · ' + esc(p.status) });
+    });
+    if (incompletos) alertas.push({ c: 'w', ic: 'box', t: incompletos === 1 ? 'Projeto sem valor ou entrega' : incompletos + ' projetos sem valor ou entrega', s: 'Notion · Projetos' });
 
     // Iris no WhatsApp
-    var conv = {}, ordem = [];
+    var conv = {}, clientes = [], respostas = 0, porHora = [];
+    for (var hh = 0; hh < 24; hh++) porHora.push(0);
     dados.wa.forEach(function (m) {
-      if (!conv[m.jid]) { conv[m.jid] = { nome: null, ultima: null, quem: null, entradas: 0 }; ordem.push(m.jid); }
-      var c = conv[m.jid];
-      if (m.direcao === 'entrada') { c.entradas++; if (m.nome) c.nome = m.nome; }
-      c.ultima = m.criado_em; c.quem = m.direcao;
+      if (!conv[m.jid]) conv[m.jid] = { entradas: 0, quem: null, ultima: null };
+      var c = conv[m.jid]; if (m.direcao === 'entrada') c.entradas++; c.quem = m.direcao; c.ultima = m.criado_em;
+      if (m.direcao === 'iris') respostas++;
+      porHora[horaNum(m.criado_em)]++;
     });
-    var pausadas = {}; dados.pausas.forEach(function (p) { pausadas[p.jid] = p; });
-    var clientes = ordem.filter(function (j) { return conv[j].entradas > 0; });
-    var irisRespondeu = dados.wa.filter(function (m) { return m.direcao === 'iris'; }).length;
-    html = linha('', clientes.length + (clientes.length === 1 ? ' conversa hoje' : ' conversas hoje'),
-                 irisRespondeu + ' respostas da Iris · ' + dados.pausas.length + ' com você no comando', '', '');
-    clientes.sort(function (a, b) { return conv[a].ultima < conv[b].ultima ? 1 : -1; }).slice(0, 4).forEach(function (j) {
-      var c = conv[j], nome = esc(c.nome || j.replace(/@.*/, ''));
-      var hora = new Date(c.ultima).toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
-      var quem = c.quem === 'entrada' ? 'aguardando' : (c.quem === 'kaio' ? 'você respondeu' : 'Iris respondeu');
-      var sub = pausadas[j] ? 'Iris pausada · ' + esc(pausadas[j].motivo || '') : quem;
-      var dot = pausadas[j] ? 'w' : (c.quem === 'entrada' && minutosDesde(c.ultima) > 2 ? 'c' : '');
-      html += linha(dot, nome, sub, hora, '');
-    });
-    $('iris').innerHTML = html;
+    for (var j in conv) if (conv.hasOwnProperty(j) && conv[j].entradas) clientes.push(j);
+    var aguardando = clientes.filter(function (j) { return conv[j].quem === 'entrada' && minutosDesde(conv[j].ultima) > 2 && !dados.pausas.some(function (p) { return p.jid === j; }); }).length;
+    $('at-sub').textContent = clientes.length + (clientes.length === 1 ? ' CONVERSA' : ' CONVERSAS') + ' · ' + respostas + ' RESPOSTAS · ' + dados.pausas.length + ' COM VOCÊ';
+    onda(porHora);
+    $('hd-resp').textContent = respostas;
+    $('hd-esp').textContent = dados.inbox.length;
+    $('hd-esp').className = dados.inbox.length ? 'w' : '';
 
-    // Supervisor dos agentes (última revisão de cada conversa)
+    // Supervisor
     var porConversa = {}, revs = [];
     dados.revisoes.forEach(function (rv) { if (!porConversa[rv.jid]) { porConversa[rv.jid] = 1; revs.push(rv); } });
-    var peso = { grave: 0, atencao: 1, ok: 2 };
-    var notas = revs.filter(function (rv) { return rv.nota != null; }).map(function (rv) { return rv.nota; });
-    var media = notas.length ? (notas.reduce(function (a, b) { return a + b; }, 0) / notas.length).toFixed(1) : '—';
-    var semProblema = revs.filter(function (rv) { return rv.gravidade === 'ok'; }).length;
-    html = '';
-    revs.slice().sort(function (a, b) { return peso[a.gravidade] - peso[b.gravidade]; }).filter(function (rv) { return rv.gravidade !== 'ok'; }).slice(0, 3).forEach(function (rv) {
-      var nome = esc(rv.nome || String(rv.jid).replace(/@.*/, ''));
-      var prob = (rv.problemas || []).map(esc).join(' · ') || esc(rv.resumo || '');
-      var hora = new Date(rv.ultima_msg_em).toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
-      html += linha(rv.gravidade === 'grave' ? 'c' : 'w', nome + ' · ' + (rv.gravidade === 'grave' ? 'grave' : 'atenção'), prob, hora, rv.gravidade === 'grave' ? 'c' : 'w');
-      if (rv.gravidade === 'grave') alertas.push({ n: rv.nota != null ? rv.nota : '!', c: 'c', t: 'Iris errou com ' + nome, s: prob });
-    });
-    html += linha(revs.length ? '' : 'g', revs.length ? (semProblema + (semProblema === 1 ? ' conversa sem problema' : ' conversas sem problema')) : 'Nenhuma conversa revisada hoje',
-                  revs.length ? (revs.length + ' revisadas · nota média ' + media) : 'Revisa a cada 15 min as conversas que pararam', revs.length ? 'ok' : '—', '');
-    $('supervisor').innerHTML = html;
+    var notas = revs.filter(function (rv) { return rv.nota != null; }).map(function (rv) { return Number(rv.nota); });
+    var media = notas.length ? (notas.reduce(function (a, b) { return a + b; }, 0) / notas.length) : null;
+    var graves = revs.filter(function (rv) { return rv.gravidade === 'grave'; });
+    graves.forEach(function (rv) { alertas.push({ c: 'r', ic: 'eye', t: 'Iris errou com ' + esc(rv.nome || String(rv.jid).replace(/@.*/, '')), s: 'Supervisor · ' + esc((rv.problemas || []).join(' · ') || rv.resumo || '') }); });
 
-    // Sistemas no ar (vigia)
-    html = '';
-    var ordemStatus = { fora: 0, suspeito: 1, ok: 2 };
-    dados.sistemas.slice().sort(function (a, b) { return ordemStatus[a.status] - ordemStatus[b.status]; }).forEach(function (st) {
-      var dot = st.status === 'fora' ? 'c' : (st.status === 'suspeito' ? 'w' : '');
-      var lado = st.status === 'ok' ? 'no ar' : (st.status === 'fora' ? 'fora · ' + espera(minutosDesde(st.desde)) : 'conferindo');
-      html += linha(dot, esc(st.nome), esc(st.tipo) + ' · ' + esc(st.detalhe || ''), lado, st.status === 'fora' ? 'c' : (st.status === 'suspeito' ? 'w' : ''));
-      if (st.status === 'fora') alertas.push({ n: espera(minutosDesde(st.desde)), c: 'c', t: esc(st.nome) + ' fora do ar', s: esc(st.detalhe || st.tipo) });
+    // Sistemas no ar
+    var ordem = { fora: 0, suspeito: 1, ok: 2 }, linhas = [], sOk = 0, iris = null;
+    dados.sistemas.forEach(function (st) { if (st.status === 'ok') sOk++; if (/iris/i.test(st.nome || '')) iris = st; });
+    dados.sistemas.slice().sort(function (a, b) { return ordem[a.status] - ordem[b.status]; }).forEach(function (st) {
+      if (st.status === 'fora') { linhas.push(item('x', 'r', esc(st.nome), esc(st.tipo) + ' · ' + esc(st.detalhe || ''), 'FORA · ' + espera(minutosDesde(st.desde)), 'r')); alertas.push({ c: 'r', ic: 'alerta', t: esc(st.nome) + ' fora do ar', s: esc(st.detalhe || st.tipo) + ' · ' + espera(minutosDesde(st.desde)) }); }
+      else if (st.status === 'suspeito') linhas.push(item('alerta', 'w', esc(st.nome), esc(st.tipo) + ' · ' + esc(st.detalhe || ''), 'CONFERINDO', 'w'));
     });
+    var erroAberto = false;
     dados.eventos.forEach(function (ev) {
-      var hora = new Date(ev.criado_em).toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
-      var txt = { caiu: 'caiu', voltou: 'voltou', reparo: 'consertado sozinho', erro_fluxo: 'erro no fluxo' }[ev.evento] || ev.evento;
-      if (ev.evento === 'erro_fluxo') {
-        if (ev.resolvido_em) {
-          var horaOk = new Date(ev.resolvido_em).toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
-          html += linha('', esc(ev.nome), 'Erro às ' + hora + ' · resolvido às ' + horaOk, 'resolvido', '');
-        } else {
-          var minErro = minutosDesde(ev.criado_em);
-          html += linha('w', esc(ev.nome) + ' · erro no fluxo', esc(ev.detalhe || ''), hora, 'w');
-          if (minErro >= 15) alertas.push({ n: espera(minErro), c: 'w', t: esc(ev.nome) + ' com erro', s: 'Ainda não voltou a rodar bem' });
-        }
-        return;
-      }
-      html += linha(ev.evento === 'caiu' ? 'w' : 'g', esc(ev.nome) + ' · ' + txt, esc(ev.detalhe || ''), hora, '');
+      if (ev.evento !== 'erro_fluxo') return;
+      if (ev.resolvido_em) linhas.push(item('ok', '', esc(ev.nome), 'Erro às ' + horaBR(ev.criado_em) + ' · resolvido às ' + horaBR(ev.resolvido_em), 'RESOLVIDO', 'cy'));
+      else { erroAberto = true; var me = minutosDesde(ev.criado_em); linhas.push(item('fluxo', 'w', esc(ev.nome), 'Erro no fluxo · ' + esc(ev.detalhe || ''), horaBR(ev.criado_em), 'w')); if (me >= 15) alertas.push({ c: 'w', ic: 'fluxo', t: esc(ev.nome) + ' com erro', s: 'Ainda não voltou a rodar bem · ' + espera(me) }); }
     });
-    $('sistemas').innerHTML = html || linha('g', 'Vigia ainda não rodou', 'Aparece aqui depois da primeira checagem', '—', '');
+    var okList = dados.sistemas.filter(function (st) { return st.status === 'ok'; });
+    var VAGAS = 4, livres = Math.max(0, VAGAS - linhas.length);
+    var okMostra = okList.length > livres ? Math.max(0, livres - 1) : livres;
+    okList.slice(0, okMostra).forEach(function (st) { linhas.push(item('ok', '', esc(st.nome), esc(st.tipo) + ' · ' + esc(st.detalhe || ''), 'NO AR', 'cy')); });
+    var resto = okList.length - Math.min(okList.length, okMostra);
+    if (resto > 0 && linhas.length < VAGAS) linhas.push(item('ok', '', '+' + resto + ' no ar', 'Todos respondendo normalmente', 'OK', 'cy'));
+    $('sistemas').innerHTML = linhas.slice(0, VAGAS).join('') || item('fluxo', '', 'Vigia ainda não rodou', 'Aparece aqui depois da primeira checagem', '—', '');
 
-    // Faixa "Precisa de você"
-    alertas.sort(function (a, b) { return (a.c === 'c' ? 0 : 1) - (b.c === 'c' ? 0 : 1); });
-    var faixa = '<h2>Precisa de você</h2>';
-    alertas.slice(0, 4).forEach(function (a) {
-      faixa += '<div class="alert' + (a.c === 'w' ? ' w' : '') + '"><span class="n">' + a.n + '</span><div class="x">' + a.t + '<small>' + a.s + '</small></div></div>';
-    });
-    if (!alertas.length) faixa += '<div class="alert ok"><span class="n">0</span><div class="x">Nada pendente agora<small>Caixa de entrada, leads e projetos em dia</small></div></div>';
-    $('attention').innerHTML = faixa;
-    caber();
+    // Blocos do centro
+    var temFora = dados.sistemas.some(function (s) { return s.status === 'fora'; });
+    var T = [
+      { ic: 'chat', cor: '#E65516', v: clientes.length, l: 'Conversas hoje', c: '', cls: aguardando ? 'w' : '' },
+      { ic: 'eye', cor: '#D8D6C9', v: media == null ? '—' : media.toFixed(1), l: 'Nota da Iris', c: 'c', cls: graves.length ? 'r' : '' },
+      { ic: 'box', cor: '#E65516', v: ativosProj, l: 'Em construção', c: '', cls: '' },
+      { ic: temFora ? 'alerta' : 'ok', cor: temFora ? '#ff4d4d' : '#D8D6C9', v: dados.sistemas.length ? sOk + '/' + dados.sistemas.length : '—', l: 'Sistemas no ar', c: 'c', cls: temFora ? 'r' : '' }];
+    $('tiles').innerHTML = T.map(function (t) {
+      return '<div class="g tile ' + t.c + '"><div class="pn"><div class="in"><svg viewBox="0 0 24 24" style="stroke:' + t.cor + '">' + ICON[t.ic] + '</svg><span class="big ' + t.cls + '">' + t.v + '</span><span class="lbl">' + t.l + '</span></div></div></div>';
+    }).join('');
+
+    // Iris no centro + barra inferior
+    var irisOk = !iris || iris.status === 'ok';
+    $('hd-ia').textContent = irisOk ? 'ONLINE' : (iris.status === 'fora' ? 'FORA DO AR' : 'CONFERINDO');
+    $('hd-ia').className = irisOk ? 'on' : 'r';
+    $('st-sb').className = 'st' + (online ? '' : ' r');
+    $('st-n8n').className = 'st' + (erroAberto ? ' w' : '');
+    $('st-evo').className = 'st' + (irisOk ? '' : ' r');
+
+    // Precisa de você
+    alertas.sort(function (a, b) { return (a.c === 'r' ? 0 : 1) - (b.c === 'r' ? 0 : 1); });
+    $('precisa').innerHTML = alertas.length
+      ? alertas.slice(0, 3).map(function (a) { return item(a.ic, a.c, a.t, a.s, a.c === 'r' ? '●' : '!', a.c === 'r' ? 'r pulsa' : 'w'); }).join('')
+      : item('ok', '', 'Nada pendente agora', 'Caixa de entrada, leads, projetos e cobrança em dia', 'OK', 'cy');
+    $('pv-n').textContent = alertas.length ? alertas.length + (alertas.length === 1 ? ' ITEM' : ' ITENS') : 'TUDO EM DIA';
+    $('pv-n').className = alertas.some(function (a) { return a.c === 'r'; }) ? 'r' : '';
+    $('pv-rod').innerHTML = (alertas.length > 3 ? '<span class="mais"><b>+' + (alertas.length - 3) + '</b>outros</span>' : '') +
+      '<span><b>' + dados.pausas.length + '</b>com você no WhatsApp</span>' +
+      '<span><b>' + aguardando + '</b>esperando a Iris</span>';
   }
 
-  // ---------- caber na tela da TV (sem rolagem) ----------
-  function caber() {
-    document.body.style.zoom = '';
-    var cs = getComputedStyle(document.body);
-    var conteudo = document.querySelector('.wrap').offsetHeight + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
-    var z = Math.min(1, (window.innerHeight / conteudo) * 0.98);
-    if (z < 1) document.body.style.zoom = Math.max(0.5, z).toFixed(3);
+  // onda de mensagens por hora (8h às 20h)
+  function onda(porHora) {
+    var v = [], i; for (i = 8; i <= 20; i++) v.push(porHora[i] || 0);
+    var W = 744, H = 92, max = Math.max.apply(null, v) || 1, pts = [];
+    for (i = 0; i < v.length; i++) pts.push([i * W / (v.length - 1), H - 8 - v[i] / max * (H - 22)]);
+    function curva(p) { var d = 'M' + p[0][0].toFixed(1) + ',' + p[0][1].toFixed(1); for (var k = 1; k < p.length; k++) { var mx = (p[k - 1][0] + p[k][0]) / 2; d += ' C' + mx.toFixed(1) + ',' + p[k - 1][1].toFixed(1) + ' ' + mx.toFixed(1) + ',' + p[k][1].toFixed(1) + ' ' + p[k][0].toFixed(1) + ',' + p[k][1].toFixed(1); } return d; }
+    var d = curva(pts), d2 = curva(pts.map(function (p, k) { return [p[0], Math.min(H - 4, p[1] + 12 + Math.sin(k) * 5)]; }));
+    var g = ''; for (var x = 0; x <= W; x += 62) g += '<line x1="' + x + '" y1="0" x2="' + x + '" y2="' + H + '" stroke="rgba(216,214,201,.1)"/>';
+    $('onda').innerHTML = '<defs><linearGradient id="og" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E65516" stop-opacity=".35"/><stop offset="1" stop-color="#E65516" stop-opacity="0"/></linearGradient></defs>' + g +
+      '<path d="' + d + ' L' + W + ',' + H + ' L0,' + H + 'z" fill="url(#og)" stroke="none"/><path d="' + d2 + '" stroke="#D8D6C9" stroke-width="1.4" opacity=".6"/>' +
+      '<path d="' + d + '" stroke="#E65516" stroke-width="2.6" class="brilho"/>';
+    var agora = horaNum(new Date().toISOString()), hs = '';
+    for (var h = 8; h <= 20; h += 2) hs += '<span' + (agora >= h && agora < h + 2 ? ' class="on"' : '') + '>' + h + 'H</span>';
+    $('horas').innerHTML = hs;
   }
-  window.addEventListener('resize', caber);
 
   // ---------- relógio ----------
+  var DIAS = ['DOMINGO', 'SEGUNDA', 'TERÇA', 'QUARTA', 'QUINTA', 'SEXTA', 'SÁBADO'], MES = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
   function relogio() {
-    var n = new Date();
-    $('time').textContent = n.toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
-    $('date').textContent = n.toLocaleDateString('pt-BR', { timeZone: FUSO, weekday: 'long', day: 'numeric', month: 'long' });
+    var n = new Date(), p = n.toLocaleDateString('en-CA', { timeZone: FUSO }).split('-');
+    var dia = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])).getDay();
+    $('h-t').textContent = n.toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
+    $('h-dia').textContent = DIAS[dia];
+    $('h-dt').innerHTML = '<b>' + Number(p[2]) + '</b> ' + MES[Number(p[1]) - 1] + ' ' + p[0];
   }
 
   // ---------- login ----------
   function mostrarLogin() { $('login').hidden = false; setTimeout(function () { $('email').focus(); }, 50); }
   $('ver-senha').addEventListener('click', function () {
     var c = $('senha'), mostrar = c.type === 'password';
-    c.type = mostrar ? 'text' : 'password';
-    $('ver-senha').textContent = mostrar ? 'Esconder senha' : 'Mostrar senha';
+    c.type = mostrar ? 'text' : 'password'; $('ver-senha').textContent = mostrar ? 'Esconder senha' : 'Mostrar senha';
   });
   $('login-form').addEventListener('submit', function (e) {
     e.preventDefault();
@@ -591,9 +630,8 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
     }).then(function () { $('entrar').disabled = false; $('entrar').textContent = 'Entrar'; });
   });
 
-  // ---------- controle remoto (setas) ----------
-  var DIR = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0],
-              Up: [0, -1], Down: [0, 1], Left: [-1, 0], Right: [1, 0] };
+  // ---------- controle remoto ----------
+  var DIR = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], Up: [0, -1], Down: [0, 1], Left: [-1, 0], Right: [1, 0] };
   var armado = null;
   function respondi(el) {
     if (!el || !el.getAttribute('data-id')) return;
@@ -601,16 +639,16 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
     if (!armado || armado.id !== id || Date.now() > armado.ate) {
       [].forEach.call(document.querySelectorAll('.row.armed'), function (r) { r.classList.remove('armed'); });
       armado = { id: id, ate: Date.now() + 6000, txt: lado ? lado.textContent : '' };
-      el.classList.add('armed'); if (lado) lado.textContent = 'OK de novo = respondi';
+      el.classList.add('armed'); if (lado) lado.textContent = 'OK DE NOVO';
       setTimeout(function () { if (armado && armado.id === id && Date.now() > armado.ate) { el.classList.remove('armed'); if (lado) lado.textContent = armado.txt; armado = null; } }, 6200);
       return;
     }
-    armado = null; if (lado) lado.textContent = 'marcando…';
+    armado = null; if (lado) lado.textContent = 'MARCANDO…';
     rpc('marcar_respondido', { p_id: id }).then(function () {
       dados.inbox = dados.inbox.filter(function (m) { return m.id !== id; });
       desenhar(); carregar();
       var primeiro = document.querySelector('.row'); if (primeiro) primeiro.focus();
-    }, function () { el.classList.remove('armed'); if (lado) lado.textContent = 'não deu, tente de novo'; });
+    }, function () { el.classList.remove('armed'); if (lado) lado.textContent = 'TENTE DE NOVO'; });
   }
   document.addEventListener('click', function (e) {
     var el = e.target && e.target.closest ? e.target.closest('.row.inb') : null;
@@ -636,7 +674,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
       var lado = Math.abs(dx * dv[1] + dy * dv[0]), s = frente + lado * 2;
       if (s < nota) { nota = s; melhor = el; }
     });
-    if (melhor) { melhor.focus(); if (melhor.scrollIntoView) melhor.scrollIntoView(false); e.preventDefault(); }
+    if (melhor) { melhor.focus(); e.preventDefault(); }
   });
 
   // ---------- atualização automática do painel ----------
@@ -651,6 +689,100 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
     x.send();
   }
   setInterval(conferirVersao, 5 * 60000);
+
+  // ---------- escala: a tela é desenhada em 1920x1080 e se ajusta à TV ----------
+  function caber() {
+    var s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080), t = $('tela');
+    var tr = 'scale(' + s.toFixed(4) + ')';
+    t.style.webkitTransform = tr; t.style.transform = tr;
+    t.style.left = Math.max(0, (window.innerWidth - 1920 * s) / 2) + 'px'; t.style.top = Math.max(0, (window.innerHeight - 1080 * s) / 2) + 'px';
+  }
+  caber(); window.addEventListener('resize', caber);
+
+  // ---------- fundo: partículas e barras ----------
+  var ph = ''; for (var k = 0; k < 22; k++) ph += '<i class="p' + (k % 3 ? '' : ' m') + '" style="left:' + ((k * 73) % 100) + '%;-webkit-animation-duration:' + (16 + (k * 7) % 18) + 's;animation-duration:' + (16 + (k * 7) % 18) + 's;-webkit-animation-delay:-' + ((k * 11) % 30) + 's;animation-delay:-' + ((k * 11) % 30) + 's"></i>';
+  $('parts').innerHTML = ph;
+  var eq = ''; for (var q = 0; q < 34; q++) eq += '<i style="height:' + (25 + Math.abs(Math.sin(q * 1.7)) * 75).toFixed(0) + '%;-webkit-animation-delay:-' + (q * .23 % 2.4).toFixed(2) + 's;animation-delay:-' + (q * .23 % 2.4).toFixed(2) + 's"></i>';
+  $('eq').innerHTML = eq;
+
+  // ---------- reator ----------
+  (function () {
+  var $ = function (s) { return document.querySelector(s); };
+  
+  // marcações do anel
+  var h = ''; for (var i = 0; i < 72; i++) { var a = i * Math.PI / 36, l = i % 6 ? 7 : 15;
+    h += '<line x1="' + (250 + Math.cos(a) * 218).toFixed(1) + '" y1="' + (250 + Math.sin(a) * 218).toFixed(1) + '" x2="' + (250 + Math.cos(a) * (218 + l)).toFixed(1) + '" y2="' + (250 + Math.sin(a) * (218 + l)).toFixed(1) + '" stroke-width="' + (i % 6 ? 1 : 2.2) + '"' + (i % 6 ? '' : ' stroke="#FF8A4C"') + '/>'; }
+  $('#ticks').innerHTML = h;
+
+  // anéis: giram, aceleram com o mouse perto, inclinam em 3D
+  var svg = $('#nodes'), rx = $('#rx'), ptr = null, tilt = { x: 0, y: 0 }, heat = 0, wv = -1, t0 = performance.now(), last = t0, ang = [0, 0, 0, 0, 0];
+  document.addEventListener('pointermove', function (e) { var r = svg.getBoundingClientRect(); ptr = { x: (e.clientX - (r.left + r.width / 2)) / (r.width / 2), y: (e.clientY - (r.top + r.height / 2)) / (r.height / 2) }; if (Math.abs(ptr.x) > 3 || Math.abs(ptr.y) > 3) ptr = null; }, { passive: true });
+  document.addEventListener('pointerleave', function () { ptr = null; });
+  rx.addEventListener('pointerdown', function () { if (!reduce) { wv = 0; if (window.neuBurst) window.neuBurst(); } });
+  function rot(el, a) { el.setAttribute('transform', 'rotate(' + a.toFixed(2) + ' 250 250)'); }
+  function anel(t) {
+    var dt = Math.min(50, t - last) / 1000; last = t;
+    var near = ptr ? Math.max(0, 1 - Math.hypot(ptr.x, ptr.y) / 1.6) : 0; heat += (near - heat) * .06;
+    var sp = 1 + heat * 3.2;
+    ang[0] += dt * 8 * sp; ang[1] -= dt * 13 * sp; ang[2] += dt * 26 * sp; ang[3] -= dt * 3 * sp; ang[4] += dt * 5 * sp;
+    rot($('#rA'), ang[0]); rot($('#rB'), ang[1]); rot($('#rC'), ang[2]); rot($('#ticks'), ang[3]); rot($('#rD'), ang[4]);
+    var halo = $('#halo'); halo.setAttribute('opacity', (.22 + heat * .35 + Math.sin((t - t0) / 1000 * 2.2) * .05).toFixed(3)); halo.setAttribute('r', (150 + heat * 30).toFixed(1));
+    var tx = ptr ? ptr.y * -10 : 0, ty = ptr ? ptr.x * 10 : 0; tilt.x += (tx - tilt.x) * .08; tilt.y += (ty - tilt.y) * .08;
+    rx.style.transform = 'perspective(900px) rotateX(' + tilt.x.toFixed(2) + 'deg) rotateY(' + tilt.y.toFixed(2) + 'deg)';
+    var w = $('#wave'); if (wv >= 0) { wv += dt * 1.1; if (wv >= 1) { wv = -1; w.setAttribute('opacity', 0); } else { w.setAttribute('r', (100 + wv * 140).toFixed(1)); w.setAttribute('opacity', ((1 - wv) * .9).toFixed(2)); } }
+    if (!reduce) requestAnimationFrame(anel);
+  setInterval(function () { if (!reduce && !document.hidden) { wv = 0; if (window.neuBurst) window.neuBurst(); } }, 7000);
+  }
+  requestAnimationFrame(anel);
+
+  // rede neural no núcleo
+  (function () {
+    var cv = $('#neu'), cx = cv.getContext('2d'), S = 0, dpr = 1;
+    function fit() { dpr = Math.min(2, devicePixelRatio || 1); S = cv.clientWidth || 200; cv.width = cv.height = Math.round(S * dpr); }
+    fit(); addEventListener('resize', fit);
+    var N = 84, P = [], ga = Math.PI * (3 - Math.sqrt(5)), i, j;
+    for (i = 0; i < N; i++) { var y = 1 - 2 * (i + .5) / N, r = Math.sqrt(1 - y * y), a = i * ga; P.push({ p: [Math.cos(a) * r, y, Math.sin(a) * r], act: 0, cd: 0, s: [0, 0, 0] }); }
+    var E = [], nb = P.map(function () { return []; }), seen = {};
+    for (i = 0; i < N; i++) { var d = []; for (j = 0; j < N; j++) if (j !== i) { var dx = P[i].p[0] - P[j].p[0], dy = P[i].p[1] - P[j].p[1], dz = P[i].p[2] - P[j].p[2]; d.push([dx * dx + dy * dy + dz * dz, j]); }
+      d.sort(function (a, b) { return a[0] - b[0]; });
+      for (var q = 0; q < 4; q++) { var k = d[q][1], key = i < k ? i + '_' + k : k + '_' + i; if (!seen[key]) { seen[key] = 1; E.push([i, k]); nb[i].push(E.length - 1); nb[k].push(E.length - 1); } } }
+    var sig = [], ry = 0, rxa = .4, tx = 0, ty = 0, pgx = null, pgy = null, last = performance.now(), rnd = 0, disparos = 0;
+    document.addEventListener('pointermove', function (e) { var r = cv.getBoundingClientRect(), c = r.width / 2; pgx = (e.clientX - (r.left + c)) / c; pgy = (e.clientY - (r.top + c)) / c; if (Math.hypot(pgx, pgy) > 5) { pgx = pgy = null; } }, { passive: true });
+    document.addEventListener('pointerleave', function () { pgx = pgy = null; });
+    function fire(n, g) { var o = P[n]; if (o.cd > 0) return; o.act = 1; o.cd = .35; disparos++; if (g <= 0) return; nb[n].forEach(function (e) { if (sig.length < 90) sig.push({ e: e, from: n, t: 0, g: g - 1 }); }); }
+    window.neuBurst = function () { var near = []; for (var i = 0; i < N; i++) { var dx = P[i].s[0] - (pgx == null ? 0 : pgx), dy = P[i].s[1] - (pgy == null ? 0 : pgy); near.push([dx * dx + dy * dy, i]); } near.sort(function (a, b) { return a[0] - b[0]; }); for (var k = 0; k < 4; k++) { P[near[k][1]].cd = 0; fire(near[k][1], 5); } };
+    setInterval(function () { $('#lbl-sin').textContent = String(84 + disparos); }, 500);
+    var qd = 0, qIni = performance.now(), leve = false;
+    function frame(now) {
+      if (!leve) { qd++; if (now - qIni > 6000) { if (qd / ((now - qIni) / 1000) < 20) { leve = true; document.body.className += ' leve'; } qd = 0; qIni = now; } }
+      var dt = Math.min(.05, (now - last) / 1000); last = now;
+      if (!reduce) { ry += dt * .22; var px = pgx == null ? 0 : Math.max(-1, Math.min(1, pgx)), py = pgy == null ? 0 : Math.max(-1, Math.min(1, pgy)); tx += (px - tx) * .05; ty += (py - ty) * .05; rxa = .4 + ty * .5; ry += tx * dt * .9; }
+      var ca = Math.cos(ry), sa = Math.sin(ry), cb = Math.cos(rxa), sb = Math.sin(rxa), R = S / 2 * .86, c = S / 2, tt = now / 1000;
+      for (i = 0; i < N; i++) { var o = P[i], p = o.p, x = p[0] * ca + p[2] * sa, z = -p[0] * sa + p[2] * ca, yy = p[1] * cb - z * sb; z = p[1] * sb + z * cb;
+        var f = 1 / (1 - z * .3), X = x * f, Y = yy * f;
+        if (pgx != null) { var dx = pgx * .8 - X, dy = pgy * .8 - Y, dd = Math.hypot(dx, dy); if (dd < .55) { var w = (1 - dd / .55); X += dx * w * .35; Y += dy * w * .35; if (dd < .2 && z > -.3 && o.cd <= 0 && !reduce) fire(i, 3); } }
+        o.s[0] = X; o.s[1] = Y; o.s[2] = z; o.act = Math.max(0, o.act - dt * 1.5); o.cd -= dt; }
+      if (!reduce) { rnd -= dt; if (rnd <= 0) { rnd = .5 + Math.random() * .9; var k = Math.floor(Math.random() * N); if (P[k].s[2] > -.2) { P[k].cd = 0; fire(k, 2); } } }
+      for (i = sig.length - 1; i >= 0; i--) { var s = sig[i]; s.t += dt * 1.8; if (s.t >= 1) { var e = E[s.e], to = e[0] === s.from ? e[1] : e[0]; if (s.g > 0 && Math.random() < .85) { P[to].cd = 0; fire(to, s.g); } else P[to].act = Math.max(P[to].act, .7); sig.splice(i, 1); } }
+      cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.clearRect(0, 0, S, S);
+      cx.save(); cx.beginPath(); cx.arc(c, c, c, 0, 6.3); cx.clip();
+      var g1 = cx.createRadialGradient(c, c, 0, c, c, c); g1.addColorStop(0, '#34302e'); g1.addColorStop(1, '#1c1d20'); cx.fillStyle = g1; cx.fillRect(0, 0, S, S);
+      var gl = .24 + Math.sin(tt * 2) * .05 + (pgx == null ? 0 : .08), g2 = cx.createRadialGradient(c, c, 0, c, c, c * .62); g2.addColorStop(0, 'rgba(230,85,22,' + (gl * 2.2) + ')'); g2.addColorStop(1, 'rgba(230,85,22,0)'); cx.fillStyle = g2; cx.fillRect(0, 0, S, S);
+      cx.lineWidth = 1;
+      for (i = 0; i < E.length; i++) { var A = P[E[i][0]], B = P[E[i][1]], zz = (A.s[2] + B.s[2]) / 2, ac = Math.max(A.act, B.act);
+        cx.globalAlpha = .12 + Math.max(0, (zz + 1) / 2) * .3; cx.strokeStyle = '#D8D6C9'; cx.beginPath(); cx.moveTo(c + A.s[0] * R, c + A.s[1] * R); cx.lineTo(c + B.s[0] * R, c + B.s[1] * R); cx.stroke();
+        if (ac > .05) { cx.globalAlpha = Math.min(1, ac); cx.strokeStyle = '#FF7A3C'; cx.lineWidth = 1.8; if (!leve) { cx.shadowColor = '#E65516'; cx.shadowBlur = 8; } cx.beginPath(); cx.moveTo(c + A.s[0] * R, c + A.s[1] * R); cx.lineTo(c + B.s[0] * R, c + B.s[1] * R); cx.stroke(); cx.shadowBlur = 0; cx.lineWidth = 1; } }
+      for (i = 0; i < sig.length; i++) { var s2 = sig[i], e2 = E[s2.e], a2 = P[s2.from], b2 = P[e2[0] === s2.from ? e2[1] : e2[0]], X2 = c + (a2.s[0] + (b2.s[0] - a2.s[0]) * s2.t) * R, Y2 = c + (a2.s[1] + (b2.s[1] - a2.s[1]) * s2.t) * R;
+        cx.globalAlpha = .3; cx.fillStyle = '#E65516'; cx.beginPath(); cx.arc(X2, Y2, 7, 0, 6.3); cx.fill(); cx.globalAlpha = 1; cx.fillStyle = '#FFD2B5'; cx.beginPath(); cx.arc(X2, Y2, 2.6, 0, 6.3); cx.fill(); }
+      for (i = 0; i < N; i++) { var o2 = P[i], z2 = o2.s[2], r2 = (1.4 + (z2 + 1) * .7) + o2.act * 3.2;
+        if (o2.act > .05) { cx.globalAlpha = o2.act * .4; cx.fillStyle = '#E65516'; cx.beginPath(); cx.arc(c + o2.s[0] * R, c + o2.s[1] * R, r2 * 2.8, 0, 6.3); cx.fill(); }
+        cx.globalAlpha = .45 + Math.max(0, (z2 + 1) / 2) * .55; cx.fillStyle = o2.act > .3 ? '#FF8A4C' : '#F5F5F5'; cx.beginPath(); cx.arc(c + o2.s[0] * R, c + o2.s[1] * R, r2, 0, 6.3); cx.fill(); }
+      cx.globalAlpha = 1; cx.restore();
+      if (!reduce) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  })();
+})();
 
   // ---------- início ----------
   relogio(); setInterval(relogio, 1000);
