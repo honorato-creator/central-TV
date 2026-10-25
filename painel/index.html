@@ -367,14 +367,14 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
   var INTERVALO = 30000;          // busca dados novos a cada 30 s
   var CHAVE = 'central_sessao';
   var FUSO = 'America/Sao_Paulo';   // a box pode estar em outro fuso
-  var VERSAO = '2026-10-25-8';      // mude a cada publicação: a TV se atualiza sozinha
+  var VERSAO = '2026-10-25-9';      // mude a cada publicação: a TV se atualiza sozinha
 
   var $ = function (id) { return document.getElementById(id); };
   var reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   var TV = /Android|AFT|TV|BRAVIA|Tizen|Web0S|MXQ/i.test(navigator.userAgent || '') || location.search.indexOf('tv=1') >= 0;
   if (TV) document.documentElement.className += ' tv';
   var sessao = ler();
-  var dados = null, online = false; $('topo-status').firstChild.nodeValue = 'SEM CONEXÃO ';
+  var dados = null, online = false, falhasAuth = 0; $('topo-status').firstChild.nodeValue = 'SEM CONEXÃO ';
 
   // ---------- sessão ----------
   function ler() { try { return JSON.parse(localStorage.getItem(CHAVE)) || null; } catch (e) { return null; } }
@@ -413,8 +413,16 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
     if (Date.now() < sessao.expira) return Promise.resolve(sessao.access_token);
     return renovar().then(function () { return sessao.access_token; });
   }
-  function api(caminho) { return tokenValido().then(function (t) { return requisicao('GET', SUPABASE_URL + '/rest/v1/' + caminho, null, t); }); }
-  function rpc(nome, corpo) { return tokenValido().then(function (t) { return requisicao('POST', SUPABASE_URL + '/rest/v1/rpc/' + nome, corpo, t); }); }
+  var renovando = null;
+  function renovarUmaVez() { if (!renovando) renovando = renovar().then(function () { renovando = null; }, function (e) { renovando = null; throw e; }); return renovando; }
+  function comToken(fazer) {
+    return tokenValido().then(fazer).then(null, function (e) {
+      if (!e || e.status !== 401) throw e;
+      return renovarUmaVez().then(function () { return fazer(sessao.access_token); });
+    });
+  }
+  function api(caminho) { return comToken(function (t) { return requisicao('GET', SUPABASE_URL + '/rest/v1/' + caminho, null, t); }); }
+  function rpc(nome, corpo) { return comToken(function (t) { return requisicao('POST', SUPABASE_URL + '/rest/v1/rpc/' + nome, corpo, t); }); }
 
   // ---------- utilidades ----------
   function esc(s) {
@@ -483,12 +491,15 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
     ]).then(function (r) {
       var prazos = {}; (r[4] || []).forEach(function (p) { prazos[p.categoria] = p.minutos; });
       dados = { inbox: r[0] || [], hoje: r[1] || [], leads: r[2] || [], projetos: r[3] || [], prazos: prazos, wa: r[5] || [], pausas: r[6] || [], sistemas: r[7] || [], eventos: r[8] || [], revisoes: r[9] || [], prosp: r[10] || [], cobr: r[11] || [] };
-      online = true; desenhar(); $('topo-status').firstChild.nodeValue = 'CENTRAL ONLINE ';
+      online = true; falhasAuth = 0; desenhar(); $('topo-status').firstChild.nodeValue = 'CENTRAL ONLINE ';
       var h = new Date().toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
       $('sync').textContent = 'SYNC ' + h; $('sync').className = '';
       $('base-sync').innerHTML = 'ATUALIZADO <b>' + h + '</b> · V' + VERSAO.slice(-1);
     }, function (e) {
-      if (e && (e.status === 401 || e.status === 400 || e.status === 403)) { salvar(null); mostrarLogin(); return; }
+      if (e && (e.status === 401 || e.status === 400 || e.status === 403)) {
+        falhasAuth++;
+        if (falhasAuth >= 3) { salvar(null); mostrarLogin(); return; }   // 3 rodadas seguidas sem conseguir renovar
+      }
       online = false; $('topo-status').firstChild.nodeValue = 'SEM CONEXÃO ';
       $('sync').textContent = 'SEM CONEXÃO'; $('sync').className = 'off';
       $('base-sync').innerHTML = '<b class="off">SEM CONEXÃO · TENTANDO DE NOVO</b>';
@@ -658,7 +669,11 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
 
   // ---------- relógio ----------
   var DIAS = ['DOMINGO', 'SEGUNDA', 'TERÇA', 'QUARTA', 'QUINTA', 'SEXTA', 'SÁBADO'], MES = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+  var ultimoTique = Date.now();
   function relogio() {
+    var agoraMs = Date.now();
+    if (agoraMs - ultimoTique > 90000) { ultimoTique = agoraMs; setTimeout(function () { location.reload(); }, 3000); return; }
+    ultimoTique = agoraMs;
     var n = new Date(), p = n.toLocaleDateString('en-CA', { timeZone: FUSO }).split('-');
     var dia = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])).getDay();
     $('h-t').textContent = n.toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
