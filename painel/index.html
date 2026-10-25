@@ -195,7 +195,9 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
 .login button.sec{background:transparent;border-color:rgba(216,214,201,.35);color:var(--cy)}
 .login .err{color:var(--crit);min-height:1.2em;font-size:16px}
 /* modo leve: TV que não aguenta tudo */
-.leve .g{filter:none} .leve .scan,.leve #parts,.leve .eq i{display:none}
+.hero.g,.leve .g{filter:none}
+.hero .pn{box-shadow:none}
+.eq i{animation:none!important;-webkit-animation:none!important} .leve .scan,.leve #parts,.leve .eq i{display:none}
 .leve .eq{background:linear-gradient(0deg,rgba(230,85,22,.4),transparent)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
@@ -290,19 +292,19 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
     <circle id="halo" cx="250" cy="250" r="150" fill="#E65516" opacity=".22" filter="url(#gl)"/>
     <g id="ticks" stroke="#D8D6C9" opacity=".6"></g>
     <circle cx="250" cy="250" r="212" fill="none" stroke="#D8D6C9" stroke-opacity=".25" stroke-width="1" stroke-dasharray="1 5"/>
-    <circle id="rA" cx="250" cy="250" r="196" fill="none" stroke="url(#a1)" stroke-width="9" stroke-linecap="round" stroke-dasharray="330 80 150 672" filter="url(#neon)"/>
-    <circle id="rB" cx="250" cy="250" r="174" fill="none" stroke="url(#a2)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="0 520 210 363" filter="url(#neon)"/>
+    <circle id="rA" cx="250" cy="250" r="196" fill="none" stroke="url(#a1)" stroke-width="9" stroke-linecap="round" stroke-dasharray="330 80 150 672"/>
+    <circle id="rB" cx="250" cy="250" r="174" fill="none" stroke="url(#a2)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="0 520 210 363"/>
     <circle id="rD" cx="250" cy="250" r="152" fill="none" stroke="#E65516" stroke-opacity=".55" stroke-width="1.2" stroke-dasharray="40 8 6 8"/>
-    <g id="rC"><circle cx="250" cy="250" r="128" fill="none" stroke="#E65516" stroke-width="2.4" stroke-dasharray="160 40" filter="url(#neon)"/>
-      <circle cx="250" cy="122" r="6" fill="#FF8A4C" filter="url(#neon)"/><circle cx="361" cy="314" r="5" fill="#F5F5F5"/><circle cx="139" cy="314" r="5" fill="#F5F5F5"/></g>
+    <g id="rC"><circle cx="250" cy="250" r="128" fill="none" stroke="#E65516" stroke-width="2.4" stroke-dasharray="160 40"/>
+      <circle cx="250" cy="122" r="6" fill="#FF8A4C"/><circle cx="361" cy="314" r="5" fill="#F5F5F5"/><circle cx="139" cy="314" r="5" fill="#F5F5F5"/></g>
     <circle cx="250" cy="250" r="110" fill="#26272b" stroke="#E65516" stroke-opacity=".6" stroke-width="1.5"/>
-    <circle id="wave" cx="250" cy="250" r="100" fill="none" stroke="#FF8A4C" stroke-width="3" opacity="0" filter="url(#neon)"/>
+    <circle id="wave" cx="250" cy="250" r="100" fill="none" stroke="#FF8A4C" stroke-width="3" opacity="0"/>
   </svg>
   <canvas id="neu"></canvas></div>
     <div class="hcanto e"><div class="dia" id="h-dia">—</div><div class="t" id="h-t">--:--</div><div class="dt" id="h-dt">—</div></div>
     <div class="hcanto d">
       <div class="ln"><span>Iris</span><b class="on" id="hd-ia">ONLINE</b></div>
-      <div class="ln"><span>Sinapses</span><b id="lbl-sin">84</b></div>
+      <div class="ln"><span>Sinapses</span><b id="lbl-sin">42</b></div>
       <div class="ln"><span>Respostas hoje</span><b id="hd-resp">0</b></div>
       <div class="ln"><span>Esperando você</span><b id="hd-esp">0</b></div>
     </div>
@@ -338,7 +340,6 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
   </div></div></div>
 
   <div class="base"><span class="st" id="st-sb">Supabase</span><span class="st" id="st-n8n">n8n</span><span class="st" id="st-evo">Evolution</span><span class="st" id="st-gm">Gmail</span><span class="sp"></span><span><b>KAIO HONORATO</b> · DESENVOLVEDOR</span><span class="sp"></span><span id="base-sync">CONECTANDO…</span></div>
-  <div class="scan"></div>
 </div>
 
 <script>
@@ -350,7 +351,7 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
   var INTERVALO = 30000;          // busca dados novos a cada 30 s
   var CHAVE = 'central_sessao';
   var FUSO = 'America/Sao_Paulo';   // a box pode estar em outro fuso
-  var VERSAO = '2026-10-25-3';      // mude a cada publicação: a TV se atualiza sozinha
+  var VERSAO = '2026-10-25-4';      // mude a cada publicação: a TV se atualiza sozinha
 
   var $ = function (id) { return document.getElementById(id); };
   var reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -742,7 +743,7 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
   caber(); window.addEventListener('resize', caber); setTimeout(caber, 1500); setInterval(caber, 30000);
 
   // ---------- fundo: partículas e barras ----------
-  var ph = ''; for (var k = 0; k < 22; k++) ph += '<i class="p' + (k % 3 ? '' : ' m') + '" style="left:' + ((k * 73) % 100) + '%;-webkit-animation-duration:' + (16 + (k * 7) % 18) + 's;animation-duration:' + (16 + (k * 7) % 18) + 's;-webkit-animation-delay:-' + ((k * 11) % 30) + 's;animation-delay:-' + ((k * 11) % 30) + 's"></i>';
+  var ph = ''; for (var k = 0; k < 10; k++) ph += '<i class="p' + (k % 3 ? '' : ' m') + '" style="left:' + ((k * 73) % 100) + '%;-webkit-animation-duration:' + (16 + (k * 7) % 18) + 's;animation-duration:' + (16 + (k * 7) % 18) + 's;-webkit-animation-delay:-' + ((k * 11) % 30) + 's;animation-delay:-' + ((k * 11) % 30) + 's"></i>';
   $('parts').innerHTML = ph;
   var eq = ''; for (var q = 0; q < 34; q++) eq += '<i style="height:' + (25 + Math.abs(Math.sin(q * 1.7)) * 75).toFixed(0) + '%;-webkit-animation-delay:-' + (q * .23 % 2.4).toFixed(2) + 's;animation-delay:-' + (q * .23 % 2.4).toFixed(2) + 's"></i>';
   $('eq').innerHTML = eq;
@@ -780,22 +781,24 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
   // rede neural no núcleo
   (function () {
     var cv = $('#neu'), cx = cv.getContext('2d'), S = 0, dpr = 1;
-    function fit() { dpr = Math.min(2, devicePixelRatio || 1); S = cv.clientWidth || 200; cv.width = cv.height = Math.round(S * dpr); }
+    function fit() { dpr = 1; S = cv.clientWidth || 200; cv.width = cv.height = Math.round(S * dpr); }
     fit(); addEventListener('resize', fit);
-    var N = 84, P = [], ga = Math.PI * (3 - Math.sqrt(5)), i, j;
+    var N = 42, P = [], ga = Math.PI * (3 - Math.sqrt(5)), i, j;
     for (i = 0; i < N; i++) { var y = 1 - 2 * (i + .5) / N, r = Math.sqrt(1 - y * y), a = i * ga; P.push({ p: [Math.cos(a) * r, y, Math.sin(a) * r], act: 0, cd: 0, s: [0, 0, 0] }); }
     var E = [], nb = P.map(function () { return []; }), seen = {};
     for (i = 0; i < N; i++) { var d = []; for (j = 0; j < N; j++) if (j !== i) { var dx = P[i].p[0] - P[j].p[0], dy = P[i].p[1] - P[j].p[1], dz = P[i].p[2] - P[j].p[2]; d.push([dx * dx + dy * dy + dz * dz, j]); }
       d.sort(function (a, b) { return a[0] - b[0]; });
-      for (var q = 0; q < 4; q++) { var k = d[q][1], key = i < k ? i + '_' + k : k + '_' + i; if (!seen[key]) { seen[key] = 1; E.push([i, k]); nb[i].push(E.length - 1); nb[k].push(E.length - 1); } } }
+      for (var q = 0; q < 3; q++) { var k = d[q][1], key = i < k ? i + '_' + k : k + '_' + i; if (!seen[key]) { seen[key] = 1; E.push([i, k]); nb[i].push(E.length - 1); nb[k].push(E.length - 1); } } }
     var sig = [], ry = 0, rxa = .4, tx = 0, ty = 0, pgx = null, pgy = null, last = performance.now(), rnd = 0, disparos = 0;
     document.addEventListener('pointermove', function (e) { var r = cv.getBoundingClientRect(), c = r.width / 2; pgx = (e.clientX - (r.left + c)) / c; pgy = (e.clientY - (r.top + c)) / c; if (Math.hypot(pgx, pgy) > 5) { pgx = pgy = null; } }, { passive: true });
     document.addEventListener('pointerleave', function () { pgx = pgy = null; });
-    function fire(n, g) { var o = P[n]; if (o.cd > 0) return; o.act = 1; o.cd = .35; disparos++; if (g <= 0) return; nb[n].forEach(function (e) { if (sig.length < 90) sig.push({ e: e, from: n, t: 0, g: g - 1 }); }); }
+    function fire(n, g) { var o = P[n]; if (o.cd > 0) return; o.act = 1; o.cd = .35; disparos++; if (g <= 0) return; nb[n].forEach(function (e) { if (sig.length < 30) sig.push({ e: e, from: n, t: 0, g: g - 1 }); }); }
     window.neuBurst = function () { var near = []; for (var i = 0; i < N; i++) { var dx = P[i].s[0] - (pgx == null ? 0 : pgx), dy = P[i].s[1] - (pgy == null ? 0 : pgy); near.push([dx * dx + dy * dy, i]); } near.sort(function (a, b) { return a[0] - b[0]; }); for (var k = 0; k < 4; k++) { P[near[k][1]].cd = 0; fire(near[k][1], 5); } };
-    setInterval(function () { $('#lbl-sin').textContent = String(84 + disparos); }, 500);
+    setInterval(function () { $('#lbl-sin').textContent = String(42 + disparos); }, 500);
     var qd = 0, qIni = performance.now(), leve = false;
+    var pula = false;
     function frame(now) {
+      pula = !pula; if (pula && !reduce) { requestAnimationFrame(frame); return; }
       if (!leve) { qd++; if (now - qIni > 6000) { if (qd / ((now - qIni) / 1000) < 20) { leve = true; document.body.className += ' leve'; } qd = 0; qIni = now; } }
       var dt = Math.min(.05, (now - last) / 1000); last = now;
       if (!reduce) { ry += dt * .22; var px = pgx == null ? 0 : Math.max(-1, Math.min(1, pgx)), py = pgy == null ? 0 : Math.max(-1, Math.min(1, pgy)); tx += (px - tx) * .05; ty += (py - ty) * .05; rxa = .4 + ty * .5; ry += tx * dt * .9; }
@@ -813,7 +816,7 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
       cx.lineWidth = 1;
       for (i = 0; i < E.length; i++) { var A = P[E[i][0]], B = P[E[i][1]], zz = (A.s[2] + B.s[2]) / 2, ac = Math.max(A.act, B.act);
         cx.globalAlpha = .12 + Math.max(0, (zz + 1) / 2) * .3; cx.strokeStyle = '#D8D6C9'; cx.beginPath(); cx.moveTo(c + A.s[0] * R, c + A.s[1] * R); cx.lineTo(c + B.s[0] * R, c + B.s[1] * R); cx.stroke();
-        if (ac > .05) { cx.globalAlpha = Math.min(1, ac); cx.strokeStyle = '#FF7A3C'; cx.lineWidth = 1.8; if (!leve) { cx.shadowColor = '#E65516'; cx.shadowBlur = 8; } cx.beginPath(); cx.moveTo(c + A.s[0] * R, c + A.s[1] * R); cx.lineTo(c + B.s[0] * R, c + B.s[1] * R); cx.stroke(); cx.shadowBlur = 0; cx.lineWidth = 1; } }
+        if (ac > .05) { cx.globalAlpha = Math.min(1, ac); cx.strokeStyle = '#FF7A3C'; cx.lineWidth = 1.8;  cx.beginPath(); cx.moveTo(c + A.s[0] * R, c + A.s[1] * R); cx.lineTo(c + B.s[0] * R, c + B.s[1] * R); cx.stroke(); cx.shadowBlur = 0; cx.lineWidth = 1; } }
       for (i = 0; i < sig.length; i++) { var s2 = sig[i], e2 = E[s2.e], a2 = P[s2.from], b2 = P[e2[0] === s2.from ? e2[1] : e2[0]], X2 = c + (a2.s[0] + (b2.s[0] - a2.s[0]) * s2.t) * R, Y2 = c + (a2.s[1] + (b2.s[1] - a2.s[1]) * s2.t) * R;
         cx.globalAlpha = .3; cx.fillStyle = '#E65516'; cx.beginPath(); cx.arc(X2, Y2, 7, 0, 6.3); cx.fill(); cx.globalAlpha = 1; cx.fillStyle = '#FFD2B5'; cx.beginPath(); cx.arc(X2, Y2, 2.6, 0, 6.3); cx.fill(); }
       for (i = 0; i < N; i++) { var o2 = P[i], z2 = o2.s[2], r2 = (1.4 + (z2 + 1) * .7) + o2.act * 3.2;
