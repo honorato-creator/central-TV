@@ -367,14 +367,14 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
   var INTERVALO = 30000;          // busca dados novos a cada 30 s
   var CHAVE = 'central_sessao';
   var FUSO = 'America/Sao_Paulo';   // a box pode estar em outro fuso
-  var VERSAO = '2026-10-25-9';      // mude a cada publicação: a TV se atualiza sozinha
+  var VERSAO = '2026-10-25-10';      // mude a cada publicação: a TV se atualiza sozinha
 
   var $ = function (id) { return document.getElementById(id); };
   var reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   var TV = /Android|AFT|TV|BRAVIA|Tizen|Web0S|MXQ/i.test(navigator.userAgent || '') || location.search.indexOf('tv=1') >= 0;
   if (TV) document.documentElement.className += ' tv';
   var sessao = ler();
-  var dados = null, online = false, falhasAuth = 0; $('topo-status').firstChild.nodeValue = 'SEM CONEXÃO ';
+  var dados = null, online = false, falhasAuth = 0, desvio = 0;   // desvio: diferença entre o relógio da TV Box e o do servidor $('topo-status').firstChild.nodeValue = 'SEM CONEXÃO ';
 
   // ---------- sessão ----------
   function ler() { try { return JSON.parse(localStorage.getItem(CHAVE)) || null; } catch (e) { return null; } }
@@ -492,9 +492,9 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
       var prazos = {}; (r[4] || []).forEach(function (p) { prazos[p.categoria] = p.minutos; });
       dados = { inbox: r[0] || [], hoje: r[1] || [], leads: r[2] || [], projetos: r[3] || [], prazos: prazos, wa: r[5] || [], pausas: r[6] || [], sistemas: r[7] || [], eventos: r[8] || [], revisoes: r[9] || [], prosp: r[10] || [], cobr: r[11] || [] };
       online = true; falhasAuth = 0; desenhar(); $('topo-status').firstChild.nodeValue = 'CENTRAL ONLINE ';
-      var h = new Date().toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
+      var hb = new Date(Date.now() + desvio - 3 * 3600000), h = (hb.getUTCHours() < 10 ? '0' : '') + hb.getUTCHours() + ':' + (hb.getUTCMinutes() < 10 ? '0' : '') + hb.getUTCMinutes();
       $('sync').textContent = 'SYNC ' + h; $('sync').className = '';
-      $('base-sync').innerHTML = 'ATUALIZADO <b>' + h + '</b> · V' + VERSAO.slice(-1);
+      $('base-sync').innerHTML = 'ATUALIZADO <b>' + h + '</b> · V' + VERSAO.split('-').pop();
     }, function (e) {
       if (e && (e.status === 401 || e.status === 400 || e.status === 403)) {
         falhasAuth++;
@@ -674,11 +674,11 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
     var agoraMs = Date.now();
     if (agoraMs - ultimoTique > 90000) { ultimoTique = agoraMs; setTimeout(function () { location.reload(); }, 3000); return; }
     ultimoTique = agoraMs;
-    var n = new Date(), p = n.toLocaleDateString('en-CA', { timeZone: FUSO }).split('-');
-    var dia = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])).getDay();
-    $('h-t').textContent = n.toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
-    $('h-dia').textContent = DIAS[dia];
-    $('h-dt').innerHTML = '<b>' + Number(p[2]) + '</b> ' + MES[Number(p[1]) - 1] + ' ' + p[0];
+    // hora de Brasília calculada à mão (UTC-3, sem horário de verão), corrigida pelo relógio do servidor
+    var b = new Date(agoraMs + desvio - 3 * 3600000), dois = function (x) { return (x < 10 ? '0' : '') + x; };
+    $('h-t').textContent = dois(b.getUTCHours()) + ':' + dois(b.getUTCMinutes());
+    $('h-dia').textContent = DIAS[b.getUTCDay()];
+    $('h-dt').innerHTML = '<b>' + b.getUTCDate() + '</b> ' + MES[b.getUTCMonth()] + ' ' + b.getUTCFullYear();
   }
 
   // ---------- login ----------
@@ -763,6 +763,8 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
     x.open('HEAD', location.pathname + '?c=' + Date.now(), true);
     x.setRequestHeader('Cache-Control', 'no-cache');
     x.onload = function () {
+      var dt = Date.parse(x.getResponseHeader('Date') || '');
+      if (dt) { var d = dt - Date.now(); if (Math.abs(d) > 5000) desvio = d; else desvio = 0; relogio(); }
       var c = x.getResponseHeader('ETag') || x.getResponseHeader('Last-Modified');
       if (!c) return;
       if (carimbo && c !== carimbo) conferirVersao();
@@ -770,7 +772,7 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
     };
     x.send();
   }
-  setInterval(olharCarimbo, 30000);
+  setInterval(olharCarimbo, 30000); setTimeout(olharCarimbo, 2000);
   setInterval(conferirVersao, 5 * 60000);   // garantia, caso o servidor não mande ETag
 
   // ---------- escala: a tela é desenhada em 1920x1080 e se ajusta à TV ----------
