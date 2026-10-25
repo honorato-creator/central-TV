@@ -351,7 +351,7 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
   var INTERVALO = 30000;          // busca dados novos a cada 30 s
   var CHAVE = 'central_sessao';
   var FUSO = 'America/Sao_Paulo';   // a box pode estar em outro fuso
-  var VERSAO = '2026-10-25-4';      // mude a cada publicação: a TV se atualiza sozinha
+  var VERSAO = '2026-10-25-5';      // mude a cada publicação: a TV se atualiza sozinha
 
   var $ = function (id) { return document.getElementById(id); };
   var reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -712,6 +712,9 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
   });
 
   // ---------- atualização automática do painel ----------
+  // A cada 30 s pergunta só o "carimbo" do arquivo (ETag), que é minúsculo.
+  // Se mudou, baixa a página e confere a VERSAO antes de recarregar.
+  var carimbo = null;
   function conferirVersao() {
     var x = new XMLHttpRequest();
     x.open('GET', location.pathname + '?versao=' + Date.now(), true);
@@ -722,7 +725,20 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
     };
     x.send();
   }
-  setInterval(conferirVersao, 5 * 60000);
+  function olharCarimbo() {
+    var x = new XMLHttpRequest();
+    x.open('HEAD', location.pathname + '?c=' + Date.now(), true);
+    x.setRequestHeader('Cache-Control', 'no-cache');
+    x.onload = function () {
+      var c = x.getResponseHeader('ETag') || x.getResponseHeader('Last-Modified');
+      if (!c) return;
+      if (carimbo && c !== carimbo) conferirVersao();
+      carimbo = c;
+    };
+    x.send();
+  }
+  setInterval(olharCarimbo, 30000);
+  setInterval(conferirVersao, 5 * 60000);   // garantia, caso o servidor não mande ETag
 
   // ---------- escala: a tela é desenhada em 1920x1080 e se ajusta à TV ----------
   // mede a tela pelo próprio CSS (100vw x 100vh): alguns navegadores de TV informam innerWidth errado
