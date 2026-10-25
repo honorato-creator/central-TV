@@ -108,6 +108,20 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
 .hcanto.d span{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--lbl)}
 .hcanto.d b{font-family:var(--num);font-weight:400;font-size:20px;color:#fff}
 .hcanto.d b.on{color:var(--ok);text-shadow:0 0 8px var(--ok)}
+.rxp .cam{position:absolute;top:0;left:0;width:100%;height:100%;overflow:visible}
+.rxp .gira{will-change:transform;-webkit-animation:gira 40s linear infinite;animation:gira 40s linear infinite}
+.rxp .g-t{-webkit-animation-duration:120s;animation-duration:120s;-webkit-animation-direction:reverse;animation-direction:reverse}
+.rxp .g-a{-webkit-animation-duration:45s;animation-duration:45s}
+.rxp .g-b{-webkit-animation-duration:28s;animation-duration:28s;-webkit-animation-direction:reverse;animation-direction:reverse}
+.rxp .g-d{-webkit-animation-duration:72s;animation-duration:72s}
+.rxp .g-c{-webkit-animation-duration:14s;animation-duration:14s}
+@-webkit-keyframes gira{to{-webkit-transform:rotate(360deg)}}
+.rxp .halo{position:absolute;left:18%;top:18%;width:64%;height:64%;border-radius:50%;background:radial-gradient(circle,rgba(230,85,22,.38),rgba(230,85,22,0) 68%);will-change:opacity;-webkit-animation:halo 3s ease-in-out infinite;animation:halo 3s ease-in-out infinite}
+@-webkit-keyframes halo{50%{opacity:.55}}@keyframes halo{50%{opacity:.55}}
+.rxp .onda-choque{position:absolute;left:30%;top:30%;width:40%;height:40%;border-radius:50%;border:3px solid #FF8A4C;opacity:0;will-change:transform,opacity}
+.rxp .onda-choque.on{-webkit-animation:choque 1s ease-out;animation:choque 1s ease-out}
+@-webkit-keyframes choque{0%{opacity:.9;-webkit-transform:scale(1)}100%{opacity:0;-webkit-transform:scale(2.3)}}
+@keyframes choque{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(2.3)}}
 /* barra inferior */
 .base{position:absolute;left:28px;right:28px;bottom:22px;height:46px;display:flex;align-items:center;gap:18px;padding:0 26px;
   border:1px solid rgba(230,85,22,.55);box-shadow:0 0 12px rgba(230,85,22,.35),inset 0 0 18px rgba(216,214,201,.25);background:rgba(24,24,26,.88);
@@ -278,29 +292,27 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
 
   <!-- ===== centro ===== -->
   <div class="g hero" style="left:568px;top:100px;width:784px;height:470px"><div class="pn"><div class="in" style="background:linear-gradient(180deg,#121214,#1c1714)">
-    <div class="rxp" id="rx"><svg id="nodes" viewBox="0 0 500 500" aria-hidden="true">
-    <defs>
-      <radialGradient id="disco" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#2e2522"/><stop offset=".55" stop-color="#1e1e21"/><stop offset="1" stop-color="#141416"/></radialGradient>
-      <linearGradient id="a1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A4C"/><stop offset="1" stop-color="#E65516"/></linearGradient>
-      <linearGradient id="a2" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5F5F5"/><stop offset="1" stop-color="#D8D6C9" stop-opacity=".35"/></linearGradient>
-      <filter id="gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="16"/></filter>
-      <filter id="neon" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-    </defs>
-    
-    <circle cx="250" cy="250" r="236" fill="url(#disco)"/>
-    <circle cx="250" cy="250" r="236" fill="none" stroke="#E65516" stroke-width="1.6" opacity=".8" filter="url(#neon)"/>
-    <circle id="halo" cx="250" cy="250" r="150" fill="#E65516" opacity=".22" filter="url(#gl)"/>
-    <g id="ticks" stroke="#D8D6C9" opacity=".6"></g>
-    <circle cx="250" cy="250" r="212" fill="none" stroke="#D8D6C9" stroke-opacity=".25" stroke-width="1" stroke-dasharray="1 5"/>
-    <circle id="rA" cx="250" cy="250" r="196" fill="none" stroke="url(#a1)" stroke-width="9" stroke-linecap="round" stroke-dasharray="330 80 150 672"/>
-    <circle id="rB" cx="250" cy="250" r="174" fill="none" stroke="url(#a2)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="0 520 210 363"/>
-    <circle id="rD" cx="250" cy="250" r="152" fill="none" stroke="#E65516" stroke-opacity=".55" stroke-width="1.2" stroke-dasharray="40 8 6 8"/>
-    <g id="rC"><circle cx="250" cy="250" r="128" fill="none" stroke="#E65516" stroke-width="2.4" stroke-dasharray="160 40"/>
-      <circle cx="250" cy="122" r="6" fill="#FF8A4C"/><circle cx="361" cy="314" r="5" fill="#F5F5F5"/><circle cx="139" cy="314" r="5" fill="#F5F5F5"/></g>
-    <circle cx="250" cy="250" r="110" fill="#26272b" stroke="#E65516" stroke-opacity=".6" stroke-width="1.5"/>
-    <circle id="wave" cx="250" cy="250" r="100" fill="none" stroke="#FF8A4C" stroke-width="3" opacity="0"/>
-  </svg>
-  <canvas id="neu"></canvas></div>
+    <div class="rxp" id="rx">
+    <svg class="cam" viewBox="0 0 500 500" aria-hidden="true">
+      <defs><radialGradient id="disco" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#2e2522"/><stop offset=".55" stop-color="#1e1e21"/><stop offset="1" stop-color="#141416"/></radialGradient></defs>
+      <circle cx="250" cy="250" r="236" fill="url(#disco)"/>
+      <circle cx="250" cy="250" r="236" fill="none" stroke="#E65516" stroke-width="7" opacity=".14"/>
+      <circle cx="250" cy="250" r="236" fill="none" stroke="#E65516" stroke-width="1.6" opacity=".85"/>
+      <circle cx="250" cy="250" r="212" fill="none" stroke="#D8D6C9" stroke-opacity=".25" stroke-width="1" stroke-dasharray="1 5"/>
+      <circle cx="250" cy="250" r="110" fill="#26272b" stroke="#E65516" stroke-opacity=".6" stroke-width="1.5"/>
+    </svg>
+    <div class="halo"></div>
+    <svg class="cam gira g-t" viewBox="0 0 500 500" aria-hidden="true"><g id="ticks" stroke="#D8D6C9" opacity=".6"></g></svg>
+    <svg class="cam gira g-a" viewBox="0 0 500 500" aria-hidden="true"><defs><linearGradient id="a1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A4C"/><stop offset="1" stop-color="#E65516"/></linearGradient></defs>
+      <circle cx="250" cy="250" r="196" fill="none" stroke="#E65516" stroke-width="18" stroke-linecap="round" stroke-dasharray="330 80 150 672" opacity=".16"/>
+      <circle cx="250" cy="250" r="196" fill="none" stroke="url(#a1)" stroke-width="9" stroke-linecap="round" stroke-dasharray="330 80 150 672"/></svg>
+    <svg class="cam gira g-b" viewBox="0 0 500 500" aria-hidden="true"><defs><linearGradient id="a2" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5F5F5"/><stop offset="1" stop-color="#D8D6C9" stop-opacity=".35"/></linearGradient></defs>
+      <circle cx="250" cy="250" r="174" fill="none" stroke="url(#a2)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="0 520 210 363"/></svg>
+    <svg class="cam gira g-d" viewBox="0 0 500 500" aria-hidden="true"><circle cx="250" cy="250" r="152" fill="none" stroke="#E65516" stroke-opacity=".55" stroke-width="1.2" stroke-dasharray="40 8 6 8"/></svg>
+    <svg class="cam gira g-c" viewBox="0 0 500 500" aria-hidden="true"><circle cx="250" cy="250" r="128" fill="none" stroke="#E65516" stroke-width="2.4" stroke-dasharray="160 40"/>
+      <circle cx="250" cy="122" r="9" fill="#E65516" opacity=".3"/><circle cx="250" cy="122" r="6" fill="#FF8A4C"/><circle cx="361" cy="314" r="5" fill="#F5F5F5"/><circle cx="139" cy="314" r="5" fill="#F5F5F5"/></svg>
+    <div class="onda-choque" id="wave"></div>
+    <canvas id="neu"></canvas></div>
     <div class="hcanto e"><div class="dia" id="h-dia">—</div><div class="t" id="h-t">--:--</div><div class="dt" id="h-dt">—</div></div>
     <div class="hcanto d">
       <div class="ln"><span>Iris</span><b class="on" id="hd-ia">ONLINE</b></div>
@@ -351,7 +363,7 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
   var INTERVALO = 30000;          // busca dados novos a cada 30 s
   var CHAVE = 'central_sessao';
   var FUSO = 'America/Sao_Paulo';   // a box pode estar em outro fuso
-  var VERSAO = '2026-10-25-5';      // mude a cada publicação: a TV se atualiza sozinha
+  var VERSAO = '2026-10-25-6';      // mude a cada publicação: a TV se atualiza sozinha
 
   var $ = function (id) { return document.getElementById(id); };
   var reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -773,26 +785,13 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
     h += '<line x1="' + (250 + Math.cos(a) * 218).toFixed(1) + '" y1="' + (250 + Math.sin(a) * 218).toFixed(1) + '" x2="' + (250 + Math.cos(a) * (218 + l)).toFixed(1) + '" y2="' + (250 + Math.sin(a) * (218 + l)).toFixed(1) + '" stroke-width="' + (i % 6 ? 1 : 2.2) + '"' + (i % 6 ? '' : ' stroke="#FF8A4C"') + '/>'; }
   $('#ticks').innerHTML = h;
 
-  // anéis: giram, aceleram com o mouse perto, inclinam em 3D
-  var svg = $('#nodes'), rx = $('#rx'), ptr = null, tilt = { x: 0, y: 0 }, heat = 0, wv = -1, t0 = performance.now(), last = t0, ang = [0, 0, 0, 0, 0];
-  document.addEventListener('pointermove', function (e) { var r = svg.getBoundingClientRect(); ptr = { x: (e.clientX - (r.left + r.width / 2)) / (r.width / 2), y: (e.clientY - (r.top + r.height / 2)) / (r.height / 2) }; if (Math.abs(ptr.x) > 3 || Math.abs(ptr.y) > 3) ptr = null; }, { passive: true });
-  document.addEventListener('pointerleave', function () { ptr = null; });
-  rx.addEventListener('pointerdown', function () { if (!reduce) { wv = 0; if (window.neuBurst) window.neuBurst(); } });
-  function rot(el, a) { el.setAttribute('transform', 'rotate(' + a.toFixed(2) + ' 250 250)'); }
-  function anel(t) {
-    var dt = Math.min(50, t - last) / 1000; last = t;
-    var near = ptr ? Math.max(0, 1 - Math.hypot(ptr.x, ptr.y) / 1.6) : 0; heat += (near - heat) * .06;
-    var sp = 1 + heat * 3.2;
-    ang[0] += dt * 8 * sp; ang[1] -= dt * 13 * sp; ang[2] += dt * 26 * sp; ang[3] -= dt * 3 * sp; ang[4] += dt * 5 * sp;
-    rot($('#rA'), ang[0]); rot($('#rB'), ang[1]); rot($('#rC'), ang[2]); rot($('#ticks'), ang[3]); rot($('#rD'), ang[4]);
-    var halo = $('#halo'); halo.setAttribute('opacity', (.22 + heat * .35 + Math.sin((t - t0) / 1000 * 2.2) * .05).toFixed(3)); halo.setAttribute('r', (150 + heat * 30).toFixed(1));
-    var tx = ptr ? ptr.y * -10 : 0, ty = ptr ? ptr.x * 10 : 0; tilt.x += (tx - tilt.x) * .08; tilt.y += (ty - tilt.y) * .08;
-    rx.style.transform = 'perspective(900px) rotateX(' + tilt.x.toFixed(2) + 'deg) rotateY(' + tilt.y.toFixed(2) + 'deg)';
-    var w = $('#wave'); if (wv >= 0) { wv += dt * 1.1; if (wv >= 1) { wv = -1; w.setAttribute('opacity', 0); } else { w.setAttribute('r', (100 + wv * 140).toFixed(1)); w.setAttribute('opacity', ((1 - wv) * .9).toFixed(2)); } }
-    if (!reduce) requestAnimationFrame(anel);
-  setInterval(function () { if (!reduce && !document.hidden) { wv = 0; if (window.neuBurst) window.neuBurst(); } }, 7000);
-  }
-  requestAnimationFrame(anel);
+  // anéis giram por CSS (placa de vídeo); aqui só o disparo a cada 7 s
+  var onda = $('#wave');
+  setInterval(function () {
+    if (reduce || document.hidden) return;
+    onda.className = 'onda-choque'; void onda.offsetWidth; onda.className = 'onda-choque on';
+    if (window.neuBurst) window.neuBurst();
+  }, 7000);
 
   // rede neural no núcleo
   (function () {
@@ -812,9 +811,9 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
     window.neuBurst = function () { var near = []; for (var i = 0; i < N; i++) { var dx = P[i].s[0] - (pgx == null ? 0 : pgx), dy = P[i].s[1] - (pgy == null ? 0 : pgy); near.push([dx * dx + dy * dy, i]); } near.sort(function (a, b) { return a[0] - b[0]; }); for (var k = 0; k < 4; k++) { P[near[k][1]].cd = 0; fire(near[k][1], 5); } };
     setInterval(function () { $('#lbl-sin').textContent = String(42 + disparos); }, 500);
     var qd = 0, qIni = performance.now(), leve = false;
-    var pula = false;
+    var pula = 0;
     function frame(now) {
-      pula = !pula; if (pula && !reduce) { requestAnimationFrame(frame); return; }
+      pula = (pula + 1) % 3; if (pula && !reduce) { requestAnimationFrame(frame); return; }   // ~20 quadros por segundo
       if (!leve) { qd++; if (now - qIni > 6000) { if (qd / ((now - qIni) / 1000) < 20) { leve = true; document.body.className += ' leve'; } qd = 0; qIni = now; } }
       var dt = Math.min(.05, (now - last) / 1000); last = now;
       if (!reduce) { ry += dt * .22; var px = pgx == null ? 0 : Math.max(-1, Math.min(1, pgx)), py = pgy == null ? 0 : Math.max(-1, Math.min(1, pgy)); tx += (px - tx) * .05; ty += (py - ty) * .05; rxa = .4 + ty * .5; ry += tx * dt * .9; }
