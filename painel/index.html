@@ -367,7 +367,7 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
   var INTERVALO = 30000;          // busca dados novos a cada 30 s
   var CHAVE = 'central_sessao';
   var FUSO = 'America/Sao_Paulo';   // a box pode estar em outro fuso
-  var VERSAO = '2026-10-25-7';      // mude a cada publicação: a TV se atualiza sozinha
+  var VERSAO = '2026-10-25-8';      // mude a cada publicação: a TV se atualiza sozinha
 
   var $ = function (id) { return document.getElementById(id); };
   var reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -813,8 +813,8 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
     var sig = [], ry = 0, rxa = .4, tx = 0, ty = 0, pgx = null, pgy = null, last = performance.now(), rnd = 0, disparos = 0;
     document.addEventListener('pointermove', function (e) { var r = cv.getBoundingClientRect(), c = r.width / 2; pgx = (e.clientX - (r.left + c)) / c; pgy = (e.clientY - (r.top + c)) / c; if (Math.hypot(pgx, pgy) > 5) { pgx = pgy = null; } }, { passive: true });
     document.addEventListener('pointerleave', function () { pgx = pgy = null; });
-    function fire(n, g) { var o = P[n]; if (o.cd > 0) return; o.act = 1; o.cd = .35; disparos++; if (g <= 0) return; nb[n].forEach(function (e) { if (sig.length < 30) sig.push({ e: e, from: n, t: 0, g: g - 1 }); }); }
-    window.neuBurst = function () { var near = []; for (var i = 0; i < N; i++) { var dx = P[i].s[0] - (pgx == null ? 0 : pgx), dy = P[i].s[1] - (pgy == null ? 0 : pgy); near.push([dx * dx + dy * dy, i]); } near.sort(function (a, b) { return a[0] - b[0]; }); for (var k = 0; k < 4; k++) { P[near[k][1]].cd = 0; fire(near[k][1], 5); } };
+    function fire(n, g) { var o = P[n]; if (o.cd > 0) return; o.act = 1; o.cd = .35; disparos++; if (g <= 0 || sig.length >= 1) return; var ls = nb[n]; sig.push({ e: ls[Math.floor(Math.random() * ls.length)], from: n, t: 0, g: g - 1 }); }
+    window.neuBurst = function () { if (sig.length) return; var k = Math.floor(Math.random() * N); P[k].cd = 0; fire(k, 5); };
     setInterval(function () { $('#lbl-sin').textContent = String(42 + disparos); }, 500);
     var qd = 0, qIni = performance.now(), leve = false;
     var pula = 0;
@@ -826,10 +826,10 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
       var ca = Math.cos(ry), sa = Math.sin(ry), cb = Math.cos(rxa), sb = Math.sin(rxa), R = S / 2 * .86, c = S / 2, tt = now / 1000;
       for (i = 0; i < N; i++) { var o = P[i], p = o.p, x = p[0] * ca + p[2] * sa, z = -p[0] * sa + p[2] * ca, yy = p[1] * cb - z * sb; z = p[1] * sb + z * cb;
         var f = 1 / (1 - z * .3), X = x * f, Y = yy * f;
-        if (pgx != null) { var dx = pgx * .8 - X, dy = pgy * .8 - Y, dd = Math.hypot(dx, dy); if (dd < .55) { var w = (1 - dd / .55); X += dx * w * .35; Y += dy * w * .35; if (dd < .2 && z > -.3 && o.cd <= 0 && !reduce) fire(i, 3); } }
+        if (pgx != null) { var dx = pgx * .8 - X, dy = pgy * .8 - Y, dd = Math.hypot(dx, dy); if (dd < .55) { var w = (1 - dd / .55); X += dx * w * .35; Y += dy * w * .35; if (dd < .2 && z > -.3 && o.cd <= 0 && !reduce && !sig.length) fire(i, 5); } }
         o.s[0] = X; o.s[1] = Y; o.s[2] = z; o.act = Math.max(0, o.act - dt * 1.5); o.cd -= dt; }
-      if (!reduce) { rnd -= dt; if (rnd <= 0) { rnd = .5 + Math.random() * .9; var k = Math.floor(Math.random() * N); if (P[k].s[2] > -.2) { P[k].cd = 0; fire(k, 2); } } }
-      for (i = sig.length - 1; i >= 0; i--) { var s = sig[i]; s.t += dt * 1.8; if (s.t >= 1) { var e = E[s.e], to = e[0] === s.from ? e[1] : e[0]; if (s.g > 0 && Math.random() < .85) { P[to].cd = 0; fire(to, s.g); } else P[to].act = Math.max(P[to].act, .7); sig.splice(i, 1); } }
+      if (!reduce) { rnd -= dt; if (rnd <= 0) { rnd = .5 + Math.random() * .9; var k = Math.floor(Math.random() * N); if (P[k].s[2] > -.2 && !sig.length) { P[k].cd = 0; fire(k, 5); } } }
+      for (i = sig.length - 1; i >= 0; i--) { var s = sig[i]; s.t += dt * 1.8; if (s.t >= 1) { var e = E[s.e], to = e[0] === s.from ? e[1] : e[0]; if (s.g > 0) { P[to].cd = 0; fire(to, s.g); } else P[to].act = Math.max(P[to].act, .7); sig.splice(i, 1); } }
       cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.clearRect(0, 0, S, S);
       cx.save(); cx.beginPath(); cx.arc(c, c, c, 0, 6.3); cx.clip();
       var g1 = cx.createRadialGradient(c, c, 0, c, c, c); g1.addColorStop(0, '#34302e'); g1.addColorStop(1, '#1c1d20'); cx.fillStyle = g1; cx.fillRect(0, 0, S, S);
