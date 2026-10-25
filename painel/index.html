@@ -172,6 +172,15 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
 .base b.off,#sync.off{color:var(--crit)}
 #tela{-webkit-transform-origin:0 0}
 [hidden]{display:none!important}
+.kmark{width:44px;height:44px;flex:none;overflow:visible;color:#F5F5F5;filter:drop-shadow(0 0 5px rgba(230,85,22,.7))}
+.login .kmark{width:52px;height:52px}
+.kmark .k-ink{stroke:currentColor}.kmark .k-acc{stroke:#E65516}.kmark .k-line{stroke:currentColor;opacity:.55}.kmark .k-end{fill:currentColor;opacity:.55}
+.kmark .k-orbit{stroke:#E65516;opacity:.75}.kmark .k-node{fill:#1e1e21;stroke:currentColor;stroke-width:1.8}.kmark .k-hollow{stroke:#E65516}
+.kmark .k-dot{fill:#E65516}.kmark .k-hub{fill:#E65516;transform-box:fill-box;transform-origin:center;-webkit-animation:khub 3.4s ease-in-out infinite;animation:khub 3.4s ease-in-out infinite}
+.kmark .k-sat{fill:currentColor}.kmark .k-spin{transform-origin:16px 24px;-webkit-animation:korb 9s linear infinite;animation:korb 9s linear infinite}
+@-webkit-keyframes khub{50%{-webkit-transform:scale(1.16)}}@keyframes khub{50%{transform:scale(1.16)}}
+@-webkit-keyframes korb{to{-webkit-transform:rotate(360deg)}}@keyframes korb{to{transform:rotate(360deg)}}
+
 /* login */
 .login{position:fixed;top:0;right:0;bottom:0;left:0;z-index:20;display:-webkit-box;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse 50% 50% at 50% 50%,rgba(230,85,22,.16),transparent 70%),#0e0e10;font-size:18px}
 .login form{width:100%;max-width:440px;display:grid;gap:14px;padding:30px;background:linear-gradient(180deg,rgba(42,43,47,.96),rgba(22,22,24,.98));border:1.6px solid var(--mg);box-shadow:0 0 18px rgba(230,85,22,.45);clip-path:polygon(22px 0,100% 0,100% calc(100% - 22px),calc(100% - 22px) 100%,0 100%,0 22px)}
@@ -194,7 +203,19 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
 <body>
 <div class="login" id="login" hidden>
   <form id="login-form" autocomplete="on">
-    <h1><svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke-linecap="round" aria-hidden="true"><path d="M16,8 Q11,16 16,24 Q11,32 16,40" stroke="#F5F5F5" stroke-width="2.6"/><path d="M16,24 Q26,18 36,8 M16,24 Q26,30 36,40" stroke="#E65516" stroke-width="2.6"/><circle cx="16" cy="24" r="5" fill="#E65516"/><circle cx="36" cy="8" r="3.4" fill="#D8D6C9"/><circle cx="36" cy="40" r="3" stroke="#D8D6C9" stroke-width="1.6"/></svg><img src="wordmark-linen.png" alt="Kaio Honorato"></h1>
+    <h1><svg class="kmark" viewBox="0 0 48 48" aria-hidden="true">
+        <path class="k-ink" d="M16,8 Q11,16 16,24 Q11,32 16,40" fill="none" stroke-width="2.6" stroke-linecap="round"/>
+        <path class="k-acc" d="M16,24 Q26,18 36,8 M16,24 Q26,30 36,40" fill="none" stroke-width="2.6" stroke-linecap="round"/>
+        <path class="k-line" d="M16,8 H7 M36,40 H45 M36,8 H45" fill="none" stroke-width="1.3" stroke-linecap="round"/>
+        <circle class="k-end" cx="5.5" cy="8" r="1.5"/><circle class="k-end" cx="46.5" cy="40" r="1.5"/><circle class="k-end" cx="46.5" cy="8" r="1.5"/>
+        <circle class="k-orbit" cx="16" cy="24" r="10.5" fill="none" stroke-width="1" stroke-dasharray="1.5 3"/>
+        <g class="k-spin"><circle class="k-sat" cx="26.5" cy="24" r="2"/></g>
+        <circle class="k-node" cx="16" cy="8" r="3.4"/>
+        <circle class="k-node" cx="16" cy="40" r="3.4"/>
+        <circle class="k-node k-hollow" cx="36" cy="40" r="3.4"/>
+        <circle class="k-dot" cx="36" cy="8" r="3.6"/>
+        <circle class="k-hub" cx="16" cy="24" r="6"/>
+      </svg><img src="wordmark-linen.png" alt="Kaio Honorato"></h1>
     <p>Entre uma vez. A TV continua conectada depois disso.</p>
     <label for="email">E-mail<input id="email" type="email" required autocapitalize="none" autocorrect="off" autocomplete="username" spellcheck="false" inputmode="email"></label>
     <label for="senha">Senha<input id="senha" type="password" required autocapitalize="none" autocorrect="off" autocomplete="current-password" spellcheck="false"></label>
@@ -212,7 +233,19 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
   <!-- topo -->
   <div class="topo">
     <div class="esq" id="topo-status">CENTRAL ONLINE <svg width="14" height="14" viewBox="0 0 24 24" style="fill:#E65516;filter:drop-shadow(0 0 4px #E65516)"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z"/></svg></div>
-    <div class="aba"><svg width="34" height="34" viewBox="0 0 48 48" fill="none" stroke-linecap="round"><path d="M16,8 Q11,16 16,24 Q11,32 16,40" stroke="#fff" stroke-width="2.6"/><path d="M16,24 Q26,18 36,8 M16,24 Q26,30 36,40" stroke="#E65516" stroke-width="2.6"/><circle cx="16" cy="24" r="5" fill="#E65516"/><circle cx="36" cy="8" r="3.4" fill="#D8D6C9"/><circle cx="36" cy="40" r="3" stroke="#D8D6C9" stroke-width="1.6"/></svg><img src="wordmark-linen.png" alt="Kaio Honorato"><span>CENTRAL</span></div>
+    <div class="aba"><svg class="kmark" viewBox="0 0 48 48" aria-hidden="true">
+        <path class="k-ink" d="M16,8 Q11,16 16,24 Q11,32 16,40" fill="none" stroke-width="2.6" stroke-linecap="round"/>
+        <path class="k-acc" d="M16,24 Q26,18 36,8 M16,24 Q26,30 36,40" fill="none" stroke-width="2.6" stroke-linecap="round"/>
+        <path class="k-line" d="M16,8 H7 M36,40 H45 M36,8 H45" fill="none" stroke-width="1.3" stroke-linecap="round"/>
+        <circle class="k-end" cx="5.5" cy="8" r="1.5"/><circle class="k-end" cx="46.5" cy="40" r="1.5"/><circle class="k-end" cx="46.5" cy="8" r="1.5"/>
+        <circle class="k-orbit" cx="16" cy="24" r="10.5" fill="none" stroke-width="1" stroke-dasharray="1.5 3"/>
+        <g class="k-spin"><circle class="k-sat" cx="26.5" cy="24" r="2"/></g>
+        <circle class="k-node" cx="16" cy="8" r="3.4"/>
+        <circle class="k-node" cx="16" cy="40" r="3.4"/>
+        <circle class="k-node k-hollow" cx="36" cy="40" r="3.4"/>
+        <circle class="k-dot" cx="36" cy="8" r="3.6"/>
+        <circle class="k-hub" cx="16" cy="24" r="6"/>
+      </svg><img src="wordmark-linen.png" alt="Kaio Honorato"><span>CENTRAL</span></div>
     <div class="dir"><span id="sync">CONECTANDO…</span>
       <svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19" r="1.2" fill="#D8D6C9"/></svg>
       <svg viewBox="0 0 24 24"><rect x="2" y="7" width="18" height="10" rx="2"/><path d="M22 10v4"/><rect x="4.5" y="9.5" width="11" height="5" fill="#D8D6C9" stroke="none"/></svg></div>
@@ -317,7 +350,7 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
   var INTERVALO = 30000;          // busca dados novos a cada 30 s
   var CHAVE = 'central_sessao';
   var FUSO = 'America/Sao_Paulo';   // a box pode estar em outro fuso
-  var VERSAO = '2026-10-25-2';      // mude a cada publicação: a TV se atualiza sozinha
+  var VERSAO = '2026-10-25-3';      // mude a cada publicação: a TV se atualiza sozinha
 
   var $ = function (id) { return document.getElementById(id); };
   var reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
