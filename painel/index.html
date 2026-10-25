@@ -317,7 +317,7 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
   var INTERVALO = 30000;          // busca dados novos a cada 30 s
   var CHAVE = 'central_sessao';
   var FUSO = 'America/Sao_Paulo';   // a box pode estar em outro fuso
-  var VERSAO = '2026-10-25-1';      // mude a cada publicação: a TV se atualiza sozinha
+  var VERSAO = '2026-10-25-2';      // mude a cada publicação: a TV se atualiza sozinha
 
   var $ = function (id) { return document.getElementById(id); };
   var reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -691,13 +691,22 @@ body{font-family:var(--ui);color:var(--txt);font-weight:500}
   setInterval(conferirVersao, 5 * 60000);
 
   // ---------- escala: a tela é desenhada em 1920x1080 e se ajusta à TV ----------
+  // mede a tela pelo próprio CSS (100vw x 100vh): alguns navegadores de TV informam innerWidth errado
+  var sonda = document.createElement('div');
+  sonda.style.cssText = 'position:fixed;left:0;top:0;width:100vw;height:100vh;visibility:hidden;pointer-events:none';
+  document.body.appendChild(sonda);
   function caber() {
-    var s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080), t = $('tela');
+    var w = sonda.offsetWidth || document.documentElement.clientWidth || window.innerWidth;
+    var h = sonda.offsetHeight || document.documentElement.clientHeight || window.innerHeight;
+    var cw = document.documentElement.clientWidth, ch = document.documentElement.clientHeight;
+    if (cw && cw < w) w = cw; if (ch && ch < h) h = ch;
+    if (window.visualViewport && window.visualViewport.width) { w = Math.min(w, window.visualViewport.width); h = Math.min(h, window.visualViewport.height); }
+    var s = Math.min(w / 1920, h / 1080), t = $('tela');
     var tr = 'scale(' + s.toFixed(4) + ')';
     t.style.webkitTransform = tr; t.style.transform = tr;
-    t.style.left = Math.max(0, (window.innerWidth - 1920 * s) / 2) + 'px'; t.style.top = Math.max(0, (window.innerHeight - 1080 * s) / 2) + 'px';
+    t.style.left = Math.max(0, (w - 1920 * s) / 2) + 'px'; t.style.top = Math.max(0, (h - 1080 * s) / 2) + 'px';
   }
-  caber(); window.addEventListener('resize', caber);
+  caber(); window.addEventListener('resize', caber); setTimeout(caber, 1500); setInterval(caber, 30000);
 
   // ---------- fundo: partículas e barras ----------
   var ph = ''; for (var k = 0; k < 22; k++) ph += '<i class="p' + (k % 3 ? '' : ' m') + '" style="left:' + ((k * 73) % 100) + '%;-webkit-animation-duration:' + (16 + (k * 7) % 18) + 's;animation-duration:' + (16 + (k * 7) % 18) + 's;-webkit-animation-delay:-' + ((k * 11) % 30) + 's;animation-delay:-' + ((k * 11) % 30) + 's"></i>';
