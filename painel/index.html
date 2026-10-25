@@ -94,6 +94,9 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .stage b{display:block;font-family:var(--mono);font-size:1.3em;font-weight:500;font-variant-numeric:tabular-nums}
 .stage span{font-size:.72em;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
 .stage.hl b{color:var(--accent)}
+.stage.w b{color:var(--warn)} .stage.c b{color:var(--crit)}
+.cobr .funnel{grid-template-columns:repeat(3,minmax(0,1fr));margin:0 0 8px}
+.stage.ok b{color:var(--ok)}
 .prosp{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
 .prosp h4{margin:0 0 2px;font-size:.8em;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--soft)}
 .prosp h4 em{font-style:normal;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:400;margin-left:6px}
@@ -217,6 +220,11 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
         <header><h3>Sistemas no ar</h3><span class="src live">vigia · a cada 5 min</span></header>
         <ul class="rows" id="sistemas"></ul>
       </section>
+      <section class="box cobr">
+        <header><h3>Cobrança<em>automações e agentes</em></h3><span class="src live">Asaas</span></header>
+        <div class="funnel" id="cobr-funil"></div>
+        <ul class="rows" id="cobranca"></ul>
+      </section>
 
     </div>
   </main>
@@ -231,7 +239,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
   var INTERVALO = 30000;          // busca dados novos a cada 30 s
   var CHAVE = 'central_sessao';
   var FUSO = 'America/Sao_Paulo';   // a box pode estar em outro fuso
-  var VERSAO = '2026-10-24-1';      // mude a cada publicação: a TV se atualiza sozinha
+  var VERSAO = '2026-10-24-2';      // mude a cada publicação: a TV se atualiza sozinha
 
   var $ = function (id) { return document.getElementById(id); };
   var sessao = ler();
@@ -332,10 +340,11 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
       api('monitor_estado?select=*&order=nome.asc'),
       api('monitor_eventos?select=*&order=criado_em.desc&limit=4&or=(criado_em.gte.' + encodeURIComponent(hojeISO()) + ',and(evento.eq.erro_fluxo,resolvido_em.is.null))'),
       api('supervisor_revisoes?select=*&order=revisado_em.desc&revisado_em=gte.' + encodeURIComponent(hojeISO())),
-      api('prospeccao?select=status,nicho,tipo_telefone&limit=5000')
+      api('prospeccao?select=status,nicho,tipo_telefone&limit=5000'),
+      api('cobranca_assinaturas?select=projeto,status,dias_atraso,valor,segurar_ate&ativo=eq.true')
     ]).then(function (r) {
       var prazos = {}; (r[4] || []).forEach(function (p) { prazos[p.categoria] = p.minutos; });
-      dados = { inbox: r[0] || [], hoje: r[1] || [], leads: r[2] || [], projetos: r[3] || [], prazos: prazos, wa: r[5] || [], pausas: r[6] || [], sistemas: r[7] || [], eventos: r[8] || [], revisoes: r[9] || [], prosp: r[10] || [] };
+      dados = { inbox: r[0] || [], hoje: r[1] || [], leads: r[2] || [], projetos: r[3] || [], prazos: prazos, wa: r[5] || [], pausas: r[6] || [], sistemas: r[7] || [], eventos: r[8] || [], revisoes: r[9] || [], prosp: r[10] || [], cobr: r[11] || [] };
       desenhar();
       $('sync').className = 'sync';
       $('sync').textContent = 'atualizado ' + new Date().toLocaleTimeString('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit' });
@@ -401,7 +410,7 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
     if (pr.length) {
       var pc = function (st) { return pr.filter(function (x) { return st.indexOf(x.status) >= 0; }).length; };
       var porNicho = {}; pr.forEach(function (x) { var k = x.nicho || 'outros'; porNicho[k] = (porNicho[k] || 0) + 1; });
-      var NOME_NICHO = { psicologa: 'psicologia', fisioterapeuta: 'fisioterapia' };
+      var NOME_NICHO = { psicologa: 'psicologia', fisioterapeuta: 'fisioterapia', 'agência de marketing': 'agências' };
       var cel = pr.filter(function (x) { return x.tipo_telefone === 'Celular'; }).length;
       $('prosp').innerHTML = '<h4>Prospecção<em>' + pr.length + ' na lista de disparo</em></h4>' +
         '<div class="funnel">' +
@@ -413,6 +422,28 @@ ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
         '<span>' + cel + ' com celular</span></div>';
       $('prosp').hidden = false;
     } else { $('prosp').hidden = true; }
+
+    // Cobrança (Asaas): só automações e agentes de IA
+    var cb = dados.cobr || [];
+    var cc = function (st) { return cb.filter(function (x) { return x.status === st; }).length; };
+    $('cobr-funil').innerHTML =
+      '<div class="stage ok"><b>' + cc('em_dia') + '</b><span>Em dia</span></div>' +
+      '<div class="stage' + (cc('atrasado') ? ' w' : '') + '"><b>' + cc('atrasado') + '</b><span>Atrasados</span></div>' +
+      '<div class="stage' + (cc('pausado') ? ' c' : '') + '"><b>' + cc('pausado') + '</b><span>Pausados</span></div>';
+    html = '';
+    cb.filter(function (x) { return x.status === 'pausado' || x.status === 'atrasado'; })
+      .sort(function (a, b) { return b.dias_atraso - a.dias_atraso; }).forEach(function (x) {
+        var pausado = x.status === 'pausado';
+        var falta = 8 - x.dias_atraso;
+        var sub = (x.valor != null ? real(x.valor) + ' · ' : '') + x.dias_atraso + (x.dias_atraso === 1 ? ' dia' : ' dias') + ' de atraso' +
+          (pausado ? ' · religa sozinho quando pagar' : (x.segurar_ate ? ' · pausa segurada até ' + dataCurta(x.segurar_ate) : (falta > 0 ? ' · pausa em ' + falta + (falta === 1 ? ' dia' : ' dias') : '')));
+        html += linha(pausado ? 'c' : 'w', esc(x.projeto || 'Sem nome'), sub, pausado ? 'pausado' : 'atrasado', pausado ? 'c' : 'w');
+        if (pausado) alertas.push({ n: x.dias_atraso + 'd', c: 'c', t: esc(x.projeto) + ' pausado por falta de pagamento', s: 'Cobrança · Asaas' });
+        else if (x.dias_atraso >= 5 && !x.segurar_ate) alertas.push({ n: x.dias_atraso + 'd', c: 'w', t: esc(x.projeto) + ' pausa em ' + falta + (falta === 1 ? ' dia' : ' dias'), s: 'Cobrança · mensalidade em aberto' });
+      });
+    if (!cb.length) html = linha('g', 'Nenhuma mensalidade no Asaas', 'Preencha Assinatura Asaas e Chave do cliente no projeto', '—', '');
+    else if (!html) html = linha('', 'Todos os pagamentos em dia', cb.length + (cb.length === 1 ? ' assinatura ativa' : ' assinaturas ativas'), '✓', '');
+    $('cobranca').innerHTML = html;
 
     // Projetos
     html = ''; var incompletos = 0, mensal = 0, hojeDia = Number(new Date().toLocaleDateString('en-CA', { timeZone: FUSO }).slice(8, 10));
