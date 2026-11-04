@@ -25,3 +25,15 @@ O app recarrega o painel a cada 6 horas para pegar versões novas. Sem internet,
 
 ## Atualizar o app
 Mudou algo em `app/` → o GitHub gera uma versão nova em Releases → instalar por cima (mesma chave de assinatura, não precisa desinstalar).
+
+## Chave de assinatura (segurança)
+A chave que assina o APK **não fica no repositório**. Ela mora nos secrets do GitHub (Settings → Secrets and variables → Actions):
+
+| Secret | Conteúdo |
+|---|---|
+| `CENTRAL_TV_KEYSTORE_BASE64` | o arquivo `.keystore` em base64 |
+| `CENTRAL_TV_KEYSTORE_PASSWORD` | senha do keystore |
+| `CENTRAL_TV_KEY_ALIAS` | `centraltv` |
+| `CENTRAL_TV_KEY_PASSWORD` | senha da chave |
+
+O workflow monta o arquivo só durante o build e apaga no fim. Para compilar no próprio computador, exporte as mesmas variáveis e `CENTRAL_TV_KEYSTORE_FILE` com o caminho do `.keystore`. Guarde o `.keystore` fora do Git: sem ele não dá para atualizar o app por cima.

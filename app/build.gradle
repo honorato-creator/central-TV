@@ -14,20 +14,29 @@ android {
         versionName "1." + (System.getenv('GITHUB_RUN_NUMBER') ?: '0')
     }
 
+    // A chave de assinatura NUNCA fica no repositório. No GitHub Actions ela vem
+    // dos secrets CENTRAL_TV_* (ver .github/workflows/apk.yml); localmente, das
+    // mesmas variáveis de ambiente. Sem elas, o APK de release sai sem assinatura.
+    def chave = System.getenv('CENTRAL_TV_KEYSTORE_FILE')
+
     signingConfigs {
         box {
             // Chave fixa: cada versão nova instala por cima da anterior, sem desinstalar
-            storeFile file('central-tv.keystore')
-            storePassword 'centraltv'
-            keyAlias 'centraltv'
-            keyPassword 'centraltv'
+            if (chave) {
+                storeFile file(chave)
+                storePassword System.getenv('CENTRAL_TV_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('CENTRAL_TV_KEY_ALIAS')
+                keyPassword System.getenv('CENTRAL_TV_KEY_PASSWORD')
+            }
         }
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig signingConfigs.box
+            if (chave) {
+                signingConfig signingConfigs.box
+            }
         }
     }
 

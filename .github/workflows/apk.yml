@@ -21,8 +21,25 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.5'
+      - name: Preparar chave de assinatura (vem dos secrets)
+        env:
+          KEYSTORE_B64: ${{ secrets.CENTRAL_TV_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "::error::Falta o secret CENTRAL_TV_KEYSTORE_BASE64 (Settings → Secrets and variables → Actions)."
+            exit 1
+          fi
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/central-tv.keystore"
+          echo "CENTRAL_TV_KEYSTORE_FILE=$RUNNER_TEMP/central-tv.keystore" >> "$GITHUB_ENV"
       - name: Compilar
+        env:
+          CENTRAL_TV_KEYSTORE_PASSWORD: ${{ secrets.CENTRAL_TV_KEYSTORE_PASSWORD }}
+          CENTRAL_TV_KEY_ALIAS: ${{ secrets.CENTRAL_TV_KEY_ALIAS }}
+          CENTRAL_TV_KEY_PASSWORD: ${{ secrets.CENTRAL_TV_KEY_PASSWORD }}
         run: gradle assembleRelease --no-daemon
+      - name: Apagar chave do runner
+        if: always()
+        run: rm -f "$RUNNER_TEMP/central-tv.keystore"
       - name: Renomear
         run: cp app/build/outputs/apk/release/app-release.apk CentralTV.apk
       - uses: actions/upload-artifact@v4
